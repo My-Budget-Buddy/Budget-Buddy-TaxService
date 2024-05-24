@@ -16,6 +16,7 @@ public class TaxReturnCreditMapper {
       dto.setNumChildren(taxReturnCredit.getNumChildren());
       dto.setChildCareExpenses(taxReturnCredit.getChildCareExpenses());
       dto.setEducationExpenses(taxReturnCredit.getEducationExpenses());
+      dto.setLlcEducationExpenses(taxReturnCredit.getLlcEducationExpenses());
       dto.setIraContributions(taxReturnCredit.getIraContributions());
       dto.setClaimedAsDependent(taxReturnCredit.isClaimedAsDependent());
       return dto;
@@ -31,6 +32,7 @@ public class TaxReturnCreditMapper {
       entity.setNumChildren(dto.getNumChildren());
       entity.setChildCareExpenses(dto.getChildCareExpenses());
       entity.setEducationExpenses(dto.getEducationExpenses());
+      entity.setLlcEducationExpenses(dto.getLlcEducationExpenses());
       entity.setIraContributions(dto.getIraContributions());
       entity.setClaimedAsDependent(dto.isClaimedAsDependent());
       return entity;

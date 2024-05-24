@@ -7,9 +7,12 @@ import com.skillstorm.taxservice.dtos.W2Dto;
 import com.skillstorm.taxservice.exceptions.NotFoundException;
 import com.skillstorm.taxservice.repositories.TaxReturnDeductionRepository;
 import com.skillstorm.taxservice.repositories.TaxReturnRepository;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -228,5 +231,11 @@ public class TaxReturnService {
     @Transactional
     public void deleteAllByUserId(int userId) {
         taxReturnRepository.deleteAllByUserId(userId);
+    }
+
+    @Transactional
+    @RabbitListener(queues = "${queues.fanout}")
+    public void receiveDeleteAllByUserId(@Payload int userId) {
+      taxReturnRepository.deleteAllByUserId(userId);
     }
 }
