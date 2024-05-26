@@ -28,7 +28,6 @@ public class TaxReturnDto {
 
     private int userId;
 
-    @Enumerated(jakarta.persistence.EnumType.STRING)
     private FilingStatus filingStatus;
 
     @Size(min = 1, max = 50, message = "{firstName.size}")

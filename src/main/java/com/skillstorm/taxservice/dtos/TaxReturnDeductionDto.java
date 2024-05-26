@@ -40,7 +40,7 @@ public class TaxReturnDeductionDto {
         taxReturnDeduction.setId(this.id);
         taxReturnDeduction.setTaxReturn(new TaxReturn(this.taxReturn));
         taxReturnDeduction.setDeduction(new Deduction(this.deduction));
-        taxReturnDeduction.setAmountSpent(this.amountSpent);
+        taxReturnDeduction.setAmountSpent(this.amountSpent.setScale(2, BigDecimal.ROUND_HALF_UP));
         return taxReturnDeduction;
     }
 }

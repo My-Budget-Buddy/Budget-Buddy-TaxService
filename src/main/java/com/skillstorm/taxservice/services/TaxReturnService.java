@@ -36,8 +36,7 @@ public class TaxReturnService {
     }
 
     // Add new TaxReturn:
-    public UserDataDto addTaxReturn(TaxReturnDto newTaxReturn) {
-        taxCalculatorService.calculateAll(newTaxReturn);
+    public UserDataDto addTaxReturn(UserDataDto newTaxReturn) {
         try {
             return new UserDataDto(taxReturnRepository.saveAndFlush(newTaxReturn.mapToEntity()));
         } catch (DataIntegrityViolationException e) {
@@ -73,9 +72,10 @@ public class TaxReturnService {
         TaxReturnDto oldTaxReturn = findById(id, updatedTaxReturn.getUserId());
 
         // Set the ID of the updated TaxReturn in case it was not set in the request body
-        // and set the W2s, Deductions, OtherIncome, and TaxCredit to the old values
-        // because they're not included in the request body and would be deleted if not set here:
         updatedTaxReturn.setId(id);
+
+        // Set the W2s, Deductions, OtherIncome, and TaxCredit to match the db object
+        // because they're not included in the request body and would be deleted if not set here:
         updatedTaxReturn.setW2s(oldTaxReturn.getW2s());
         updatedTaxReturn.setDeductions(oldTaxReturn.getDeductions());
         updatedTaxReturn.setOtherIncome(oldTaxReturn.getOtherIncome());
@@ -85,7 +85,7 @@ public class TaxReturnService {
         return new UserDataDto(taxReturnRepository.saveAndFlush(updatedTaxReturn.mapToEntity()));
     }
 
-    // Delete TaxReturn:
+    // Delete TaxReturn by id:
     public void deleteTaxReturn(int id, int userId) {
         // Verify that the TaxReturn exists:
         TaxReturnDto taxReturnDto = findById(id, userId);
@@ -105,7 +105,8 @@ public class TaxReturnService {
         }
     }
 
-    // Get the current tax refund for a TaxReturn. Used for front end to keep a running total of the refund amount:
+    // Get the current tax refund for a TaxReturn. Used for front end to keep a running total of the refund amount
+    // without having to pass the entire TaxReturn object back and forth between the front end and back end:
     public RefundDto getRefund(int id, int userId) {
         TaxReturnDto taxReturnDto = findById(id, userId);
         return new RefundDto(taxReturnDto.getFederalRefund(), taxReturnDto.getStateRefund());
