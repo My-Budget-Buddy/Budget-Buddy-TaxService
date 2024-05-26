@@ -12,13 +12,14 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "tax_return",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"year", "user_id"}))
+    uniqueConstraints = @UniqueConstraint(columnNames = {"years", "user_id"}))
 public class TaxReturn {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "years")
     private int year;
 
     @Column(name = "filing_status")

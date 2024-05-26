@@ -18,6 +18,7 @@ public class W2 {
     @JoinColumn(name = "tax_return_id")
     private TaxReturn taxReturn;
 
+    @Column(name = "years")
     private int year;
 
     @Column(name = "user_id")

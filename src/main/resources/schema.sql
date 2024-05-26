@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS deduction (
 
 CREATE TABLE IF NOT EXISTS tax_return (
     id SERIAL PRIMARY KEY,
-    year INT,
+    years INT,
     filing_status INT,
     user_id INT,
     first_name VARCHAR(50),
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS tax_return (
     total_credits NUMERIC,
     federal_refund NUMERIC,
     state_refund NUMERIC,
-    CONSTRAINT unique_year_user_id UNIQUE (year, user_id)
+    CONSTRAINT unique_year_user_id UNIQUE (years, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS taxreturn_deduction (
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS taxreturn_deduction (
 CREATE TABLE IF NOT EXISTS w2 (
     id SERIAL PRIMARY KEY,
     tax_return_id INT,
-    year INT,
+    years INT,
     user_id INT,
     employer VARCHAR(50),
     wages NUMERIC DEFAULT 0,

@@ -16,7 +16,7 @@ public class FilingStatusRepositoryTest {
     @Autowired
     private FilingStatusRepository filingStatusRepository;
 
-    //@Test
+    @Test
     public void testFindByStatus() {
         // Given
         String status = "Single";
