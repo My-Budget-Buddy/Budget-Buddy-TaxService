@@ -22,7 +22,6 @@ public class W2Dto {
     @Min(value = 2015, message = "{year.must}")
     private int year;
 
-    @Min(value = 1, message = "{w2.userId.min}")
     private int userId;
 
     @NotNull(message = "{w2.employer.must}")

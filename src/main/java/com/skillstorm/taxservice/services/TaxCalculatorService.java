@@ -58,10 +58,8 @@ public class TaxCalculatorService {
       calculateAgi(taxReturn);
       calculateTaxableIncome(taxReturn);
 
-      // Calculate taxes already withheld:
-      calculateWithholdings(taxReturn);
-
       // Second, calculate tax liabilities
+      calculateWithholdings(taxReturn);
       calculateFederalTaxes(taxReturn);
       calculateStateTaxes(taxReturn);
       calculateCapitalGainsTax(taxReturn);
@@ -112,7 +110,8 @@ public class TaxCalculatorService {
               .map(deduction -> {
                 BigDecimal amountSpent = deduction.getAmountSpent();
                 BigDecimal agiLimit = deduction.getAgiLimit();
-                return amountSpent.min(agiLimit); // Deduct the smaller of the two
+                // Deduct the smaller of the two so we don't exceed the limit:
+                return amountSpent.min(agiLimit);
               })
               .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -163,10 +162,10 @@ public class TaxCalculatorService {
           if (isMarriedFilingJointly) {
             deduction.setAgiLimit(BigDecimal.valueOf(185000));
           }
-          // For Student Loan Interest, the max deduction is based on the user's total income. You cannot claim
-          // the deduction if your total income exceeds the max deduction amount, but because we're going
-          // to be comparing the total income to the max deduction amount in the next step, we want to set it
-          // to 0 if the total income exceeds the max deduction amount:
+          // For Student Loan Interest, eligibility is based on the user's adjusted income. You cannot claim
+          // the deduction if your adjusted gross income exceeds the agiLimit, but because of the way
+          // we're going to be comparing the AGI to the agiLimit in the next step, we want to set it
+          // to 0 if the Adjusted Gross Income exceeds the eligibility cap:
           if (totalIncome.compareTo(deduction.getAgiLimit()) > 0) {
             deduction.setAgiLimit(BigDecimal.ZERO);
           }

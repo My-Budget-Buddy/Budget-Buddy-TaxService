@@ -8,8 +8,8 @@ import com.skillstorm.taxservice.models.TaxReturn;
 import com.skillstorm.taxservice.utilities.mappers.OtherIncomeMapper;
 import com.skillstorm.taxservice.utilities.mappers.TaxReturnCreditMapper;
 
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -27,6 +27,8 @@ public class TaxReturnDto {
     private int year;
 
     private int userId;
+
+    @Enumerated(jakarta.persistence.EnumType.STRING)
     private FilingStatus filingStatus;
 
     @Size(min = 1, max = 50, message = "{firstName.size}")

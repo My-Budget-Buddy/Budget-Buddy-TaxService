@@ -12,6 +12,9 @@ DROP TABLE IF EXISTS savers_tax_credit CASCADE;
 DROP TABLE IF EXISTS state_tax CASCADE;
 DROP TABLE IF EXISTS states CASCADE;
 DROP TABLE IF EXISTS deduction CASCADE;
+DROP TABLE IF EXISTS tax_return CASCADE;
+DROP TABLE IF EXISTS taxreturn_deduction CASCADE;
+DROP TABLE IF EXISTS w2 CASCADE;
 
 
 CREATE TABLE IF NOT EXISTS child_tax_credit (
@@ -150,3 +153,59 @@ CREATE TABLE IF NOT EXISTS deduction (
     agi_limit DECIMAL(10, 3),
     itemized BOOLEAN
 );
+
+CREATE TABLE IF NOT EXISTS tax_return (
+    id SERIAL PRIMARY KEY,
+    years INT,
+    filing_status INT,
+    user_id INT,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(50),
+    phone_number VARCHAR(20),
+    address VARCHAR(50),
+    city VARCHAR(50),
+    state VARCHAR(2),
+    zip VARCHAR(10),
+    date_of_birth DATE,
+    ssn VARCHAR(11),
+    total_income NUMERIC,
+    adjusted_gross_income NUMERIC,
+    taxable_income NUMERIC,
+    fed_tax_withheld NUMERIC,
+    state_tax_withheld NUMERIC,
+    social_security_tax_withheld NUMERIC,
+    medicare_tax_withheld NUMERIC,
+    total_credits NUMERIC,
+    federal_refund NUMERIC,
+    state_refund NUMERIC,
+    CONSTRAINT unique_year_user_id UNIQUE (years, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS taxreturn_deduction (
+    id SERIAL PRIMARY KEY,
+    taxreturn_id INT,
+    deduction_id INT,
+    amount_spent NUMERIC,
+    CONSTRAINT fk_taxreturn FOREIGN KEY (taxreturn_id) REFERENCES tax_return(id),
+    CONSTRAINT fk_deduction FOREIGN KEY (deduction_id) REFERENCES deduction(id),
+    CONSTRAINT unique_taxreturn_deduction UNIQUE (taxreturn_id, deduction_id)
+);
+
+CREATE TABLE IF NOT EXISTS w2 (
+    id SERIAL PRIMARY KEY,
+    tax_return_id INT,
+    years INT,
+    user_id INT,
+    employer VARCHAR(50),
+    wages NUMERIC DEFAULT 0,
+    state INT,
+    federal_income_tax_withheld NUMERIC,
+    state_income_tax_withheld NUMERIC,
+    social_security_tax_withheld NUMERIC,
+    medicare_tax_withheld NUMERIC,
+    image_key VARCHAR(50),
+    CONSTRAINT fk_tax_return FOREIGN KEY (tax_return_id) REFERENCES tax_return(id)
+);
+
+

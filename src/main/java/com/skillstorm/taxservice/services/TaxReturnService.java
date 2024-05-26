@@ -2,6 +2,7 @@ package com.skillstorm.taxservice.services;
 
 import com.skillstorm.taxservice.constants.FilingStatus;
 import com.skillstorm.taxservice.dtos.*;
+import com.skillstorm.taxservice.exceptions.DuplicateDataException;
 import com.skillstorm.taxservice.exceptions.NotFoundException;
 import com.skillstorm.taxservice.exceptions.UnauthorizedException;
 import com.skillstorm.taxservice.repositories.TaxReturnDeductionRepository;
@@ -9,12 +10,11 @@ import com.skillstorm.taxservice.repositories.TaxReturnRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -38,7 +38,11 @@ public class TaxReturnService {
     // Add new TaxReturn:
     public UserDataDto addTaxReturn(TaxReturnDto newTaxReturn) {
         taxCalculatorService.calculateAll(newTaxReturn);
-        return new UserDataDto(taxReturnRepository.saveAndFlush(newTaxReturn.mapToEntity()));
+        try {
+            return new UserDataDto(taxReturnRepository.saveAndFlush(newTaxReturn.mapToEntity()));
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateDataException(environment.getProperty("taxreturn.duplicate.year"), newTaxReturn.getYear());
+        }
     }
 
     // Get TaxReturn by id:
@@ -69,7 +73,8 @@ public class TaxReturnService {
         TaxReturnDto oldTaxReturn = findById(id, updatedTaxReturn.getUserId());
 
         // Set the ID of the updated TaxReturn in case it was not set in the request body
-        // and set the W2s, Deductions, OtherIncome, and TaxCredit to the old values:
+        // and set the W2s, Deductions, OtherIncome, and TaxCredit to the old values
+        // because they're not included in the request body and would be deleted if not set here:
         updatedTaxReturn.setId(id);
         updatedTaxReturn.setW2s(oldTaxReturn.getW2s());
         updatedTaxReturn.setDeductions(oldTaxReturn.getDeductions());
@@ -93,8 +98,11 @@ public class TaxReturnService {
     // Claim a deduction for a TaxReturn:
     public TaxReturnDeductionDto claimDeduction(int id, TaxReturnDeductionDto deduction) {
         deduction.setTaxReturn(id);
-        return new TaxReturnDeductionDto(taxReturnDeductionRepository.saveAndFlush(deduction.mapToEntity()));
-
+        try {
+            return new TaxReturnDeductionDto(taxReturnDeductionRepository.saveAndFlush(deduction.mapToEntity()));
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateDataException(environment.getProperty("taxreturn.duplicate.deduction"), deduction.getDeductionName());
+        }
     }
 
     // Get the current tax refund for a TaxReturn. Used for front end to keep a running total of the refund amount:
