@@ -98,6 +98,16 @@ public class TaxReturn {
     public TaxReturn() {
         w2s = List.of();
         deductions = List.of();
+        totalIncome = BigDecimal.ZERO.setScale(2);
+        adjustedGrossIncome = BigDecimal.ZERO.setScale(2);
+        taxableIncome = BigDecimal.ZERO.setScale(2);
+        fedTaxWithheld = BigDecimal.ZERO.setScale(2);
+        stateTaxWithheld = BigDecimal.ZERO.setScale(2);
+        socialSecurityTaxWithheld = BigDecimal.ZERO.setScale(2);
+        medicareTaxWithheld = BigDecimal.ZERO.setScale(2);
+        totalCredits = BigDecimal.ZERO.setScale(2);
+        federalRefund = BigDecimal.ZERO.setScale(2);
+        stateRefund = BigDecimal.ZERO.setScale(2);
     }
 
     public TaxReturn(int id) {

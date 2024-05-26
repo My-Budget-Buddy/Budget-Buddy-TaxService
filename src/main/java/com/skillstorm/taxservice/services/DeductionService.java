@@ -31,6 +31,7 @@ public class DeductionService {
                 .filter(deduction -> !deduction.isItemized()).map(DeductionDto::new).toList();
     }
 
+    // Find list of all Itemized Deductions:
     public List<DeductionDto> findAllItemized() {
         return deductionRepository.findAll().stream()
                 .filter(Deduction::isItemized).map(DeductionDto::new).toList();

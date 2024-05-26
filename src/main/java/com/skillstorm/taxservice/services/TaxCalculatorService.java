@@ -185,11 +185,6 @@ public class TaxCalculatorService {
 
 
   public TaxReturnDto calculateTaxableIncome(TaxReturnDto taxReturn) {
-      // If there are no deductions to calculate, simply set taxable income to the total income
-      if (taxReturn.getDeductions().isEmpty()) {
-        taxReturn.setTaxableIncome(taxReturn.getAdjustedGrossIncome());
-        return taxReturn;
-      }
 
       // Calculate total itemized deductions. Here, agiLimit represents the percentage of the user's agi that can be deducted from
       // a single claim:

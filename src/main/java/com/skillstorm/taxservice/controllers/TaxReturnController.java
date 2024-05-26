@@ -28,7 +28,7 @@ public class TaxReturnController {
     // Add new TaxReturn. Should at least contain the year and can be updated later. Can also contain all user info but a
     // POST must be done before filing W2s because the TaxReturn ID is needed to associate the W2s with the TaxReturn:
     @PostMapping
-    public ResponseEntity<UserDataDto> addTaxReturn(@Valid @RequestBody TaxReturnDto newTaxReturn, @RequestHeader("User-ID") int userId) {
+    public ResponseEntity<UserDataDto> addTaxReturn(@Valid @RequestBody UserDataDto newTaxReturn, @RequestHeader("User-ID") int userId) {
         newTaxReturn.setUserId(userId);
         UserDataDto createdTaxReturn = taxReturnService.addTaxReturn(newTaxReturn);
         return ResponseEntity.created(URI.create("/" + createdTaxReturn.getId())).body(createdTaxReturn);
