@@ -3,6 +3,7 @@ package com.skillstorm.taxservice.exceptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -38,6 +39,17 @@ public class GlobalExceptionHandler {
                 .map(FieldError::getDefaultMessage).collect(Collectors.joining(", ")));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // Handle User trying to insert duplicate data (multiple tax returns for the same year,
+    // claiming the same deduction more than once in one return, etc.):
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorMessage> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(e.getMessage());
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     // Handle UnauthorizedException from trying to access resources not owned by the user::

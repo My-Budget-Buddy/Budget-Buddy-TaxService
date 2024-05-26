@@ -11,7 +11,8 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "tax_return")
+@Table(name = "tax_return",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"year", "user_id"}))
 public class TaxReturn {
 
     @Id

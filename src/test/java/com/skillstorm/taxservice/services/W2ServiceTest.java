@@ -134,7 +134,7 @@ class W2ServiceTest {
         when(w2Repository.findById(1)).thenReturn(java.util.Optional.of(returnedW2));
 
         //Call the method to test:
-        W2Dto result = w2Service.findById(1);
+        W2Dto result = w2Service.findById(1, 1);
 
         //Verify the result:
         assertEquals(1, result.getId(), "W2 ID should be 1");
@@ -155,7 +155,7 @@ class W2ServiceTest {
         when(w2Repository.findById(1)).thenReturn(Optional.empty());
 
         //Verify the exception:
-        assertThrows(NotFoundException.class, () -> w2Service.findById(1), "NotFoundException should be thrown");
+        assertThrows(NotFoundException.class, () -> w2Service.findById(1,1), "NotFoundException should be thrown");
     }
 
     // Find all W2s by UserId:
@@ -210,7 +210,7 @@ class W2ServiceTest {
         when(w2Repository.findAllByTaxReturnId(1)).thenReturn(returnedW2List);
 
         //Call the method to test:
-        List<W2Dto> result = w2Service.findAllByTaxReturnId(1);
+        List<W2Dto> result = w2Service.findAllByTaxReturnId(1,1);
 
         //Verify the result:
         assertEquals(1, result.size(), "List size should be 1");
@@ -229,7 +229,7 @@ class W2ServiceTest {
     void updateByIdSuccessTest() {
 
         //Define stubbing:
-        when(w2Repository.findById(1)).thenReturn(Optional.of(returnedW2));
+        when(w2Repository.existsById(1)).thenReturn(true);
         when(w2Repository.saveAndFlush(returnedW2)).thenReturn(returnedW2);
 
         //Call the method to test:
@@ -273,7 +273,7 @@ class W2ServiceTest {
     void deleteW2ByIdTest() {
 
         //Define stubbing:
-        when(w2Repository.findById(1)).thenReturn(Optional.of(returnedW2));
+        when(w2Repository.existsById(1)).thenReturn(true);
 
         //Define ArgumentCaptor:
         ArgumentCaptor<Integer> idCaptor = ArgumentCaptor.forClass(Integer.class);
@@ -302,7 +302,7 @@ class W2ServiceTest {
 
         //Call the method to test:
         byte[] image = {0};
-        w2Service.uploadImage(1, image, "image/png");
+        w2Service.uploadImage(1, image, "image/png", 1);
 
         //Verify the method was called:
         verify(s3Service).uploadFile(keyCaptor.capture(), imageCaptor.capture());
@@ -339,7 +339,7 @@ class W2ServiceTest {
         when(s3Service.getObject("w2s/1/1.png")).thenReturn(resource.getInputStream());
 
         //Call the method to test:
-        Resource result = w2Service.downloadImage(1);
+        Resource result = w2Service.downloadImage(1, 1);
 
         //Verify the result:
         verify(s3Service).getObject("w2s/1/1.png");

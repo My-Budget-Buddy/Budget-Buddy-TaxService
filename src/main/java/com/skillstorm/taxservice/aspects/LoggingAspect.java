@@ -33,6 +33,8 @@ public class LoggingAspect {
         log.trace("Method with signature: " + pjp.getTarget().getClass().getSimpleName() + "." + pjp.getSignature().getName() + "()");
         log.trace("With arguments: " + Arrays.toString(pjp.getArgs()));
 
+        // You don't want the logger to consume the exception, so if we catch one here
+        // we will log it and rethrow it:
         try {
             result = pjp.proceed();
         } catch (Throwable t) {
