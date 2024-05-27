@@ -245,15 +245,15 @@ Tax Service API, it functions as follows:
          "agiLimit": 90000.00,
          "itemized": false
      },
-     {
-         "id": 4,
-         "name": "Educator Expenses",
-         "agiLimit": 300.00,
-         "itemized": false
-     },
 
      ...
 
+      {
+         "id": 9,
+         "name": "Casualty Losses",
+         "agiLimit": 0.10,
+         "itemized": true
+     },
      {
          "id": 10,
          "name": "Miscellaneous Deductions",
