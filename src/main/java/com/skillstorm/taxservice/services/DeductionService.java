@@ -2,7 +2,6 @@ package com.skillstorm.taxservice.services;
 
 import com.skillstorm.taxservice.dtos.DeductionDto;
 import com.skillstorm.taxservice.exceptions.NotFoundException;
-import com.skillstorm.taxservice.models.Deduction;
 import com.skillstorm.taxservice.repositories.DeductionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
