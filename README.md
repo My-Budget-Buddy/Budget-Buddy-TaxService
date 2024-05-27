@@ -291,11 +291,13 @@ Tax Service API, it functions as follows:
 ```
 3. To claim a Deduction for a given Tax Return: `POST http://localhost:8084/taxes/taxreturns/{taxreturnId}/deductions`
 4. With request body:
-{
-    "deduction": [deductionID],
-    "amountSpent": [Amount of money spent]
-}
-5. This creates a Tax Return Deduction associated with the given TaxReturn. You can pull Tax Return Deduction ID from the response:
+```
+ {
+     "deduction": [deductionID],
+     "amountSpent": [Amount of money spent]
+ }
+```
+6. This creates a Tax Return Deduction associated with the given TaxReturn. You can pull Tax Return Deduction ID from the response:
 ```
  {
      "id": [id],
