@@ -315,7 +315,7 @@ contributions when you make the claim.
 2. View all claimed deductions for a given Tax Return: `GET http://localhost:8084/taxes/taxreturns/{taxreturnId}/deductions`
 
 ### Edit Tax Return Deductions:
-1. You can edit a claimed deduction using the Tax Return Deduction ID: `PUT http://localhost:8084/taxes/taxreturns/{id}/deductions`
+1. Edit a claimed deduction using the Tax Return Deduction ID: `PUT http://localhost:8084/taxes/taxreturns/{id}/deductions`
 2. Be sure to include the TaxReturnId in the request body:
 ```
  {
