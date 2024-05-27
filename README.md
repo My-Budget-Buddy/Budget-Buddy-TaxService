@@ -4,11 +4,16 @@
 The Tax Service API for Budget Buddy allows a user to submit their earnings and withholdings for a given year and calculates their tax refund or liability. Can be used to fill in the IRS Form 1040.
 
 ## Technologies Used
-* Java 17
-* Spring Boot - version 3.2.5
-* Spring Web
-* AWS Aurora Serverless v2 for PostgreSQL
-* Spring Cloud - version 2023.0.1
+![](https://img.shields.io/badge/-Java-007396?style=flat-square&logo=java&logoColor=white)
+![](https://img.shields.io/badge/-Spring_Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/-Spring_Security-6DB33F?style=flat-square&logo=spring-security&logoColor=white)
+![](https://img.shields.io/badge/-PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![JUnit](https://img.shields.io/badge/-JUnit-25A162?style=flat-square&logo=junit5&logoColor=white)
+![Docker](https://img.shields.io/badge/-Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/-AWS-232F3E?style=flat-square&logo=amazon-aws&logoColor=white)
+![Maven](https://img.shields.io/badge/-Maven-C71A36?style=flat-square&logo=apache-maven&logoColor=white)
+![Eureka](https://img.shields.io/badge/-Eureka-239D60?style=flat-square&logo=spring&logoColor=white)
+![Microservices](https://img.shields.io/badge/-Microservices-000000?style=flat-square&logo=cloud&logoColor=white)
 
 
 ## Features
