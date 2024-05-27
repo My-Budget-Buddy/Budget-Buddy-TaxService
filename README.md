@@ -206,7 +206,8 @@ Tax Service API, it functions as follows:
      }
  ]
 ```
-4. To delete ALL W2s from a Tax Return, send an empty list: `POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
+4. To delete ALL W2s from a Tax Return, send an empty list:
+`POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
 ```
  [
     
