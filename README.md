@@ -32,21 +32,20 @@ To-Do List:
 * Complete unit tests
 
 ## Getting Started
-Use `cd` to go to the file you want to store the project in.
+1. Use `cd` to go to the file you want to store the project in.
 
-Clone the repository using:
-`git clone git@github.com:My-Budget-Buddy/Budget-Buddy-TaxService.git`
+2. Clone the repository using: `git clone git@github.com:My-Budget-Buddy/Budget-Buddy-TaxService.git`
 
-Configure your environment variables:
-* EUREKA_URL: The URL for the BudgetBuddy: Discovery Service
-* DATABASE_URL: The URL for the PostgreSQL-compatible database you are using
-* DATABASE_USER: The username needed to authenticate with your database
-* DATABASE_PASS: The password needed to authenticate with your database
+3. Configure your environment variables:
+   * EUREKA_URL: The URL for the BudgetBuddy: Discovery Service
+   * DATABASE_URL: The URL for the PostgreSQL-compatible database you are using
+   * DATABASE_USER: The username needed to authenticate with your database
+   * DATABASE_PASS: The password needed to authenticate with your database
 
-Create a PostgreSQL database with the name: `tax-service`
+4. Create a PostgreSQL database with the name: `tax-service`
 
-The schema will be auto-generated when you run the program, but you can disable this feature in order to persist your data between sessions by editing the `src/main/resources/application.yml`
-file:
+   The schema will be auto-generated when you run the program, but you can disable this feature in order to persist your data between sessions by editing the `src/main/resources/application.yml`
+   file:
 ```
  jpa:
    hibernate:
