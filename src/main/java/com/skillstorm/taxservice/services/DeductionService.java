@@ -27,13 +27,6 @@ public class DeductionService {
 
     // Find list of all Above the Line Deductions:
     public List<DeductionDto> findAll() {
-        return deductionRepository.findAll().stream()
-                .filter(deduction -> !deduction.isItemized()).map(DeductionDto::new).toList();
-    }
-
-    // Find list of all Itemized Deductions:
-    public List<DeductionDto> findAllItemized() {
-        return deductionRepository.findAll().stream()
-                .filter(Deduction::isItemized).map(DeductionDto::new).toList();
+        return deductionRepository.findAll().stream().map(DeductionDto::new).toList();
     }
 }
