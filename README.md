@@ -251,36 +251,9 @@ Tax Service API, it functions as follows:
          "agiLimit": 300.00,
          "itemized": false
      },
-     {
-         "id": 5,
-         "name": "Medical Expenses",
-         "agiLimit": 0.08,
-         "itemized": true
-     },
-     {
-         "id": 6,
-         "name": "State and Local Taxes",
-         "agiLimit": 1.00,
-         "itemized": true
-     },
-     {
-         "id": 7,
-         "name": "Mortgage Interest",
-         "agiLimit": 1.00,
-         "itemized": true
-     },
-     {
-         "id": 8,
-         "name": "Charitable Contributions",
-         "agiLimit": 0.60,
-         "itemized": true
-     },
-     {
-         "id": 9,
-         "name": "Casualty Losses",
-         "agiLimit": 0.10,
-         "itemized": true
-     },
+
+     ...
+
      {
          "id": 10,
          "name": "Miscellaneous Deductions",
@@ -297,7 +270,7 @@ Tax Service API, it functions as follows:
      "amountSpent": [Amount of money spent]
  }
 ```
-6. This creates a Tax Return Deduction associated with the given TaxReturn. You can pull Tax Return Deduction ID from the response:
+5. This creates a Tax Return Deduction associated with the given TaxReturn. You can pull Tax Return Deduction ID from the response:
 ```
  {
      "id": [id],
