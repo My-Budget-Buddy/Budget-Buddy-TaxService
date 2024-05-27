@@ -29,12 +29,12 @@ public class OtherIncomeController {
   }
 
   @PostMapping()
-  public ResponseEntity<OtherIncomeDto> createTaxReturnCredit(@RequestBody OtherIncomeDto otherIncomeDto) {
+  public ResponseEntity<OtherIncomeDto> addOtherIncome(@RequestBody OtherIncomeDto otherIncomeDto) {
     return ResponseEntity.ok(otherIncomeService.createOtherIncome(otherIncomeDto));
   }
 
   @PutMapping()
-  public ResponseEntity<OtherIncomeDto> updateTaxReturnCredit(@RequestBody OtherIncomeDto otherIncomeDto) {
+  public ResponseEntity<OtherIncomeDto> updateOtherIncome(@RequestBody OtherIncomeDto otherIncomeDto) {
     return ResponseEntity.ok(otherIncomeService.updateOtherIncome(otherIncomeDto));
   }
 

@@ -28,15 +28,9 @@ public class DeductionController {
         return ResponseEntity.ok(deductionService.findById(id));
     }
 
-    // Retrieve list of all non-itemized (Above the Line) Deductions:
+    // Retrieve list of all Deductions:
     @GetMapping
     public ResponseEntity<List<DeductionDto>> findAllDeductions() {
         return ResponseEntity.ok(deductionService.findAll());
-    }
-
-    // Retrieve list of all itemized (Below the Line) Deductions:
-    @GetMapping("/itemized")
-    public ResponseEntity<List<DeductionDto>> findAllItemizedDeductions() {
-        return ResponseEntity.ok(deductionService.findAllItemized());
     }
 }
