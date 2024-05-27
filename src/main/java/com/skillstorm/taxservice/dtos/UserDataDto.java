@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.skillstorm.taxservice.constants.FilingStatus;
 import com.skillstorm.taxservice.constants.State;
 import com.skillstorm.taxservice.models.TaxReturn;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -14,18 +17,39 @@ import java.time.LocalDate;
 public class UserDataDto {
 
     private int id;
+
+    @Min(value = 2015, message = "{year.must}")
     private int year;
+
     private int userId;
+
     private String filingStatus;
+
+    @Size(min = 1, max = 50, message = "{firstName.size}")
     private String firstName;
+
+    @Size(min = 1, max = 50, message = "{lastName.size}")
     private String lastName;
+
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "{email.invalid}")
     private String email;
+
+    @Pattern(regexp = "^\\d{3}-\\d{3}-\\d{4}$", message = "{phone.invalid}")
     private String phoneNumber;
+
     private String address;
+
     private String city;
+
     private State state;
+
+    @Pattern(regexp = "^\\d{5}$", message = "{zip.invalid}")
     private String zip;
+
+    @Pattern(regexp = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$", message = "{date.invalid}")
     private String dateOfBirth;
+
+    @Pattern(regexp = "^\\d{3}-\\d{2}-\\d{4}$", message = "{ssn.invalid}")
     private String ssn;
 
     public UserDataDto() {
@@ -38,8 +62,7 @@ public class UserDataDto {
     public UserDataDto(@JsonProperty("filingStatus") String filingStatus) {
         this();
         if(filingStatus != null) {
-            this.filingStatus = FilingStatus.fromString(filingStatus.trim().toUpperCase())
-                    .toString();
+            this.filingStatus = FilingStatus.fromString(filingStatus.trim().toUpperCase()).toString();
         }
     }
 
