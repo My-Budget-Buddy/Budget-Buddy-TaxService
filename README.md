@@ -48,7 +48,8 @@ Tax Service API, it functions as follows:
 1. You can view all eligible Filing Statuses with GET http://localhost:8084/taxes/taxreturns/filingStatuses
 2. POST to http://localhost:8084/taxes/taxreturns
 3. With the request body:
- `{ 
+ ```
+{ 
      "year": [year],
      "filingStatus": "[filing status]",
      "firstName": "[First Name]",
@@ -61,12 +62,14 @@ Tax Service API, it functions as follows:
      "zip": "[zip code]",
      "dateOfBirth": "[YYYY-MM-DD]",
      "ssn": "[xxx-xx-xxxx]"
- }`
+ }
+```
 
 ### Editing the User Details:
 1. PUT to http://localhost:8084/taxes/taxreturns/{taxreturnId}
 2. With the request body:
-`{ 
+```
+{ 
    "year": [year],
    "filingStatus": "[filing status]",
    "firstName": "[First Name]",
@@ -79,12 +82,12 @@ Tax Service API, it functions as follows:
    "zip": "[zip code]",
    "dateOfBirth": "[YYYY-MM-DD]",
    "ssn": "[xxx-xx-xxxx]"
- }`
+ }
+```
 3. Note: This will replace everything that was previously stored, even fields not included in this request.
 
 ### Submitting W2s:
-1. POST to http://localhost:8080/stores/{store name}
-2. In the body of the request have `{ "owner" : "[owner name]", "currency" : "[money amount] }`
+1. POST 
 
 
 ## Contributors
