@@ -54,7 +54,7 @@ To-Do List:
 
 ## Usage
 
-If sending requests to the Tax Service server directly rather than through the Gateway Service you will need to include a `User-ID` in the Request Header to validate your requests.
+If sending requests to the Tax Service server directly rather than through the Gateway Service you will need to include a `User-ID` in the Request Header to authenticate your requests.
 The port is currently configured for 8084. This can be changed in the `/src/main/resources/application.yml` file. Assuming you are hosting locally and sending requests directly to the
 Tax Service API, it functions as follows:
 
