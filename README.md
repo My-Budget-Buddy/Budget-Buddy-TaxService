@@ -54,7 +54,7 @@ To-Do List:
 
 ## Usage
 
-If sending requests to the Tax Service server directly rather than through the Gateway Service you will need to include a `User-ID` in the Request Header to validate your requests.
+If sending requests to the Tax Service server directly rather than through the Gateway Service you will need to include a `User-ID` in the Request Header to authenticate your requests.
 The port is currently configured for 8084. This can be changed in the `/src/main/resources/application.yml` file. Assuming you are hosting locally and sending requests directly to the
 Tax Service API, it functions as follows:
 
@@ -224,7 +224,23 @@ Tax Service API, it functions as follows:
 3. Find all W2s ever submitted by a User: `GET http://localhost:8084/taxes/w2s`
 4. Find all W2s ever submitted by a User for a given year: `GET http://localhost:8084/taxes/w2s?year=[year]`
 
-### Submit other forms of income:
+### Submit Other Forms of Income:
+1. `POST http://localhost:8084/taxes/other-income`
+2. Request body should be in the form of:
+```
+{
+  "taxReturnId": [id; required],
+  "longTermCapitalGains": [long term capital gains; optional],
+  "shortTermCapitalGains": [short term capital gains; optional],
+  "otherInvestmentIncome": [other investment income; optional],
+  "netBusinessIncome": [net business income; optional],
+  "additionalIncome": [additional income; optional]
+}
+```
+
+### Edit Other Income
+1. `PUT http://localhost:8084/taxes/other-income`
+2. Using the same request body format as submitting other income, editing other income will simply update the tax return's other income values with the supplied values, leaving other values unchanged.
 
 ### Claiming Tax Deductions:
 1. To view all supported Tax Deduction: `GET http://localhost:8084/taxes/deductions`
@@ -307,11 +323,31 @@ contributions when you make the claim.
 ### Delete a Tax Return Deduction:
 1. You can delete a Tax Return Deduction using its ID: `DELETE http://localhost:8084/taxes/taxreturns/taxreturn/deductions/{id}`
 
-### Tax Credits:
+### Submitting Tax Credits Information:
+1. Submit user information relevant to tax credits with: `POST http://localhost:8084/taxes/tax-return-credit`
+2. The request body should follow the format of:
+```
+{
+    "taxReturnId": [id; required],
+    "numDependents": [number of user's dependents; optional],
+    "numDependentsAotc": [number of user's dependents that qualify for aotc credit; optional],
+    "numChildren": [number of user's dependents that qualify for dependent care tax credit; optional],
+    "childCareExpenses": [amount of user's child care expenses; optional],
+    "educationExpenses": [amount of user's education expenses regarding aotc credit; optional],
+    "llcEducationExpenses": [amount of user's education expenses regarding llc credit; optional],
+    "iraContributions": [amount of user's IRA contributions; optional],
+    "claimedAsDependent": [true/false; optional],
+    "claimLlcCredit": [true/false; optional]
+}
+```
+
+### Editing Tax Credits Information:
+1. Edit a user's tax return's credit information with: `PUT http://localhost:8084/taxes/tax-return-credit`
+2. Using the same request body format as submitting tax credit information, editing tax credit will simply update the tax return's tax credit values with the supplied values, leaving other values unchanged.
 
 ## Contributors
 * Quentin Hardwick
-* 
+* Fawaz Alharbi
 
 ## License
 This project uses the following license: <license_name>.
