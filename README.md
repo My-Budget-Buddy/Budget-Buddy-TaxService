@@ -17,7 +17,7 @@ The Tax Service API for Budget Buddy allows a user to submit their earnings and 
 
 
 ## Features
-* Can submit and edit personal details required for the Form 1040
+* Can submit and edit personal details required for the IRS Form 1040
 * Can file as Single, Married (Filing Separately), Married (Filing Jointly), Head of Household, or Qualifying Surviving Spouse
 * Can submit and edit multiple W2s or Other Income forms for a given year
 * Can select from among itemized and non-itemized deductions to reduce your liability
