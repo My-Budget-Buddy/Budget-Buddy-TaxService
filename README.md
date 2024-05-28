@@ -36,7 +36,7 @@ To-Do List:
 
 2. Clone the repository using: `git clone git@github.com:My-Budget-Buddy/Budget-Buddy-TaxService.git`
 
-3. Configure your environment variables:
+3. Configure your environment variables if you do not wish to use the provided defaults:
    * EUREKA_URL: The URL for the BudgetBuddy: Discovery Service
    * DATABASE_URL: The URL for the PostgreSQL-compatible database you are using
    * DATABASE_USER: The username needed to authenticate with your database
