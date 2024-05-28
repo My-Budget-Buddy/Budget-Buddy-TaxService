@@ -43,4 +43,10 @@ public class OtherIncomeController {
     otherIncomeService.deleteOtherIncome(otherIncomeDto);
     return ResponseEntity.noContent().build();
   }
+
+  @DeleteMapping("/{otherIncomeId}")
+  public ResponseEntity<Void> deleteOtherIncomeById(@PathVariable int otherIncomeId) {
+    otherIncomeService.deleteOtherIncomeById(otherIncomeId);
+    return ResponseEntity.noContent().build();
+  }
 }
