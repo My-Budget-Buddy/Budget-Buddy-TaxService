@@ -24,6 +24,7 @@ spring:
 
   # Configure Postgres:
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tax-service}
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASS:postgres}
