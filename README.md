@@ -32,7 +32,7 @@ To-Do List:
 * Complete unit tests
 
 ## Getting Started
-1. Use `cd` to go to the file you want to store the project in.
+1. Using your CLI tool, `cd` into the directory you want to store the project in.
 
 2. Clone the repository using: `git clone git@github.com:My-Budget-Buddy/Budget-Buddy-TaxService.git`
 
