@@ -71,11 +71,11 @@ class W2ServiceTest {
         returnedW2.setUserId(1);
         returnedW2.setEmployer("Test Employer");
         returnedW2.setState(1);
-        returnedW2.setWages(BigDecimal.valueOf(1000.00));
-        returnedW2.setFederalIncomeTaxWithheld(BigDecimal.valueOf(300.00));
-        returnedW2.setStateIncomeTaxWithheld(BigDecimal.ZERO);
-        returnedW2.setSocialSecurityTaxWithheld(BigDecimal.valueOf(200.00));
-        returnedW2.setMedicareTaxWithheld(BigDecimal.valueOf(100.00));
+        returnedW2.setWages(BigDecimal.valueOf(1000.00).setScale(2));
+        returnedW2.setFederalIncomeTaxWithheld(BigDecimal.valueOf(300.00).setScale(2));
+        returnedW2.setStateIncomeTaxWithheld(BigDecimal.ZERO.setScale(2));
+        returnedW2.setSocialSecurityTaxWithheld(BigDecimal.valueOf(200.00).setScale(2));
+        returnedW2.setMedicareTaxWithheld(BigDecimal.valueOf(100.00).setScale(2));
         returnedW2.setTaxReturn(new TaxReturn());
         returnedW2.setState(1);
 
@@ -98,10 +98,10 @@ class W2ServiceTest {
         assertEquals(2024, result.getYear(), "Year should be 2024");
         assertEquals(1, result.getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Add List of W2s:
@@ -120,10 +120,10 @@ class W2ServiceTest {
         assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
         assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Find W2 by ID Success:
@@ -141,10 +141,10 @@ class W2ServiceTest {
         assertEquals(2024, result.getYear(), "Year should be 2024");
         assertEquals(1, result.getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Find W2 by ID Failure:
@@ -174,10 +174,10 @@ class W2ServiceTest {
         assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
         assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Find all W2s by UserId and Year:
@@ -196,10 +196,10 @@ class W2ServiceTest {
         assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
         assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Find all W2s by TaxReturnId:
@@ -218,10 +218,10 @@ class W2ServiceTest {
         assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
         assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Update W2 by ID Success:
@@ -240,10 +240,10 @@ class W2ServiceTest {
         assertEquals(2024, result.getYear(), "Year should be 2024");
         assertEquals(1, result.getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Update All W2s by TaxReturnId:
@@ -262,10 +262,10 @@ class W2ServiceTest {
         assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
         assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
         assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Delete W2 by ID:
@@ -317,10 +317,10 @@ class W2ServiceTest {
         assertEquals(1, result.getId(), "W2 ID should be 1");
         assertEquals("Test Employer", result.getEmployer(), "Employer should be 'Test Employer'");
         assertEquals(2024, result.getYear(), "Year should be 2024");
-        assertEquals(BigDecimal.valueOf(1000.00), result.getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
+        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.getWages(), "Wages should be 1000.00");
+        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
+        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
+        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
         assertEquals(1, result.getUserId(), "User ID should be 1");
         assertEquals("w2s/1/1.png", result.getImageKey(), "Image Key should be 'w2s/1/1.png'");
     }
