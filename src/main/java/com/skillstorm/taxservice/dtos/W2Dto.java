@@ -84,11 +84,11 @@ public class W2Dto {
         if(state != null) {
             w2.setState(state.getValue());
         }
-        w2.setWages(wages);
-        w2.setFederalIncomeTaxWithheld(federalIncomeTaxWithheld);
-        w2.setStateIncomeTaxWithheld(stateIncomeTaxWithheld);
-        w2.setSocialSecurityTaxWithheld(socialSecurityTaxWithheld);
-        w2.setMedicareTaxWithheld(medicareTaxWithheld);
+        w2.setWages(wages.setScale(2, BigDecimal.ROUND_HALF_UP));
+        w2.setFederalIncomeTaxWithheld(federalIncomeTaxWithheld.setScale(2, BigDecimal.ROUND_HALF_UP));
+        w2.setStateIncomeTaxWithheld(stateIncomeTaxWithheld.setScale(2, BigDecimal.ROUND_HALF_UP));
+        w2.setSocialSecurityTaxWithheld(socialSecurityTaxWithheld.setScale(2, BigDecimal.ROUND_HALF_UP));
+        w2.setMedicareTaxWithheld(medicareTaxWithheld.setScale(2, BigDecimal.ROUND_HALF_UP));
         w2.setImageKey(imageKey);
         return w2;
     }
