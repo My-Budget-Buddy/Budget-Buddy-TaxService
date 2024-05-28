@@ -534,10 +534,12 @@ public class TaxCalculatorService {
       // Get agi value
       BigDecimal agi = taxReturn.getAdjustedGrossIncome();
 
-      // If user's investment income is greater than the investment income limit: not eligible for this credit; return
-      if (taxReturn.getOtherIncome().getOtherInvestmentIncome().doubleValue() >= earnedIncomeTaxCredit.getInvestmentIncomeLimit() ||
-          agi.compareTo(BigDecimal.ZERO) <= 0) {
-        return taxReturn;
+      if(taxReturn.getOtherIncome() != null) {
+        // If user's investment income is greater than the investment income limit: not eligible for this credit; return
+        if (taxReturn.getOtherIncome().getOtherInvestmentIncome().doubleValue() >= earnedIncomeTaxCredit.getInvestmentIncomeLimit() ||
+                agi.compareTo(BigDecimal.ZERO) <= 0) {
+          return taxReturn;
+        }
       }
 
       // Initialize variables
