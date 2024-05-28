@@ -49,6 +49,9 @@ spring:
   sql:
     init:
       mode: always
+
+  rabbitmq:
+    host: rabbitmq
       
       # Configure the way JPA interacts with the database:
 logging:
