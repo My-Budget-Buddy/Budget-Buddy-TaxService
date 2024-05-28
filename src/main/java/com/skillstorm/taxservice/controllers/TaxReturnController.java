@@ -87,10 +87,12 @@ public class TaxReturnController {
         return ResponseEntity.ok(taxReturnService.getDeductions(id));
     }
 
-    // Update a TaxReturnDeduction:
+    // Update a TaxReturnDeduction. This is used to update the amount spent on a deduction. We think it makes more sense
+    // to only let the user update the amount spent. If they want to change the type of deduction, they should delete the
+    // current deduction and add a new one:
     @PutMapping("taxreturn/deductions/{taxReturnDeductionId}")
-    public ResponseEntity<TaxReturnDeductionDto> updateTaxReturnDeduction(@PathVariable("taxReturnDeductionId") int taxReturnDeductionId, @RequestBody TaxReturnDeductionDto updatedDeduction) {
-        return ResponseEntity.ok(taxReturnService.updateTaxReturnDeduction(taxReturnDeductionId, updatedDeduction));
+    public ResponseEntity<TaxReturnDeductionDto> updateTaxReturnDeduction(@PathVariable("taxReturnDeductionId") int taxReturnDeductionId, @RequestBody TaxReturnDeductionDto amountSpent) {
+        return ResponseEntity.ok(taxReturnService.updateTaxReturnDeduction(taxReturnDeductionId, amountSpent));
     }
 
     // Delete a TaxReturnDeduction:

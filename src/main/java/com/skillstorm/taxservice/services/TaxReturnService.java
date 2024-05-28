@@ -125,15 +125,16 @@ public class TaxReturnService {
     }
 
     // Update a TaxReturnDeduction:
-    public TaxReturnDeductionDto updateTaxReturnDeduction(int taxReturnDeductionId, TaxReturnDeductionDto updatedDeduction) {
-        // Verify that the TaxReturnDeduction exists:
-        getTaxReturnDeductionById(taxReturnDeductionId);
+    public TaxReturnDeductionDto updateTaxReturnDeduction(int taxReturnDeductionId, TaxReturnDeductionDto amountSpent) {
 
-        // Set the ID of the updated TaxReturnDeduction in case it was not set in the request body:
-        updatedDeduction.setId(taxReturnDeductionId);
+        // Verify that the TaxReturnDeduction exists and pull it from the database:
+        TaxReturnDeductionDto existingDeduction = getTaxReturnDeductionById(taxReturnDeductionId);
+
+        // Update the amount spent on the TaxReturnDeduction:
+        existingDeduction.setAmountSpent(amountSpent.getAmountSpent());
 
         // Save the updated TaxReturnDeduction to the database:
-        return new TaxReturnDeductionDto(taxReturnDeductionRepository.saveAndFlush(updatedDeduction.mapToEntity()));
+        return new TaxReturnDeductionDto(taxReturnDeductionRepository.saveAndFlush(existingDeduction.mapToEntity()));
     }
 
     // Delete a TaxReturnDeduction:

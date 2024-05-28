@@ -32,4 +32,9 @@ public class Deduction {
         super();
         this.id = id;
     }
+
+    public Deduction(int id, String name) {
+        this(id);
+        this.name = name;
+    }
 }

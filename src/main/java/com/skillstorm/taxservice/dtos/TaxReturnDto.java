@@ -8,7 +8,6 @@ import com.skillstorm.taxservice.models.TaxReturn;
 import com.skillstorm.taxservice.utilities.mappers.OtherIncomeMapper;
 import com.skillstorm.taxservice.utilities.mappers.TaxReturnCreditMapper;
 
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
