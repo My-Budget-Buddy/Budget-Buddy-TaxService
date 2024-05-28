@@ -15,6 +15,8 @@ DROP TABLE IF EXISTS deduction CASCADE;
 DROP TABLE IF EXISTS tax_return CASCADE;
 DROP TABLE IF EXISTS taxreturn_deduction CASCADE;
 DROP TABLE IF EXISTS w2 CASCADE;
+DROP TABLE IF EXISTS other_income CASCADE;
+DROP TABLE IF EXISTS taxreturn_credit CASCADE;
 
 
 CREATE TABLE IF NOT EXISTS child_tax_credit (
@@ -206,6 +208,32 @@ CREATE TABLE IF NOT EXISTS w2 (
     medicare_tax_withheld NUMERIC,
     image_key VARCHAR(50),
     CONSTRAINT fk_tax_return FOREIGN KEY (tax_return_id) REFERENCES tax_return(id)
+);
+
+CREATE TABLE IF NOT EXISTS other_income (
+  id SERIAL PRIMARY KEY,
+  tax_return_id INT NOT NULL,
+  long_term_capital_gains DECIMAL,
+  short_term_capital_gains DECIMAL,
+  other_investment_income DECIMAL,
+  net_business_income DECIMAL,
+  additional_income DECIMAL,
+  FOREIGN KEY (tax_return_id) REFERENCES tax_return(id)
+);
+
+CREATE TABLE IF NOT EXISTS taxreturn_credit (
+  id SERIAL PRIMARY KEY,
+  tax_return_id INT NOT NULL,
+  num_dependents INT,
+  num_dependents_aotc INT,
+  num_dependents_under_13 INT,
+  child_care_expenses DECIMAL,
+  education_expenses DECIMAL,
+  llc_education_expenses DECIMAL,
+  ira_contributions DECIMAL,
+  claimed_as_dependent BOOLEAN,
+  llc_credit BOOLEAN,
+  FOREIGN KEY (tax_return_id) REFERENCES tax_return(id)
 );
 
 
