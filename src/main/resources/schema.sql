@@ -235,5 +235,3 @@ CREATE TABLE IF NOT EXISTS taxreturn_credit (
   llc_credit BOOLEAN,
   FOREIGN KEY (tax_return_id) REFERENCES tax_return(id)
 );
-
-

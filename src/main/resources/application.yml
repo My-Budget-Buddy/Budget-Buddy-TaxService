@@ -62,10 +62,10 @@ logging:
 
 # creating the rabbitmq fanout exchange
 exchanges:
-  fanout: delete-user                         # name of the exchange
+  fanout: delete-user
 
 queues:
-  fanout: deleteUserQueue                    # name of the queue
+  fanout: deleteUserQueue
 
 # creating the routing key for the exchange
 routing-key: key1234
