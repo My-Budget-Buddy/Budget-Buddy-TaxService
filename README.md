@@ -32,11 +32,11 @@ To-Do List:
 * Complete unit tests
 
 ## Getting Started
-1. Use `cd` to go to the file you want to store the project in.
+1. Using your CLI tool, `cd` into the directory you want to store the project in.
 
 2. Clone the repository using: `git clone git@github.com:My-Budget-Buddy/Budget-Buddy-TaxService.git`
 
-3. Configure your environment variables:
+3. Configure your environment variables if you do not wish to use the provided defaults:
    * EUREKA_URL: The URL for the BudgetBuddy: Discovery Service
    * DATABASE_URL: The URL for the PostgreSQL-compatible database you are using
    * DATABASE_USER: The username needed to authenticate with your database
@@ -55,7 +55,7 @@ To-Do List:
 ## Usage
 
 If sending requests to the Tax Service server directly rather than through the Gateway Service you will need to include a `User-ID` in the Request Header to authenticate your requests.
-The port is currently configured for 8084. This can be changed in the `/src/main/resources/application.yml` file. Assuming you are hosting locally and sending requests directly to the
+The port is currently configured for `8084`. This can be changed in the `/src/main/resources/application.yml` file. Assuming you are hosting locally and sending requests directly to the
 Tax Service API, it functions as follows:
 
 ### Starting a new Tax Return:
@@ -116,7 +116,7 @@ Tax Service API, it functions as follows:
    "ssn": "[xxx-xx-xxxx]"
  }
 ```
-3. Note: This will replace everything that was previously stored, even fields not included in this request.
+3. Note: This will replace everything that was previously stored. Fields not included in this request will be set to `null`.
 
 ### Find and view the current state of a Tax Return:
 1. `GET http://localhost:8084/taxes/taxreturns/{taxreturnId}`
