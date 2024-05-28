@@ -11,6 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +47,8 @@ public class W2Service {
     }
 
     // Find W2 by ID:
-    public W2Dto findById(int id) {
+    @PostAuthorize("returnObject.userId == #userId")
+    public W2Dto findById(int id, int userId) {
         return new W2Dto(w2Repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(environment.getProperty("w2.not.found") + " " + id)));
     }
@@ -62,14 +64,17 @@ public class W2Service {
     }
 
     // Find all W2s by TaxReturnId:
-    public List<W2Dto> findAllByTaxReturnId(int taxReturnId) {
+    @PostAuthorize("returnObject.get(0).userId == #userId")
+    public List<W2Dto> findAllByTaxReturnId(int taxReturnId, int userId) {
         return w2Repository.findAllByTaxReturnId(taxReturnId).stream().map(W2Dto::new).toList();
     }
 
     // Update W2 by ID:
     public W2Dto updateById(int id, W2Dto updatedW2) {
         // Verify W2 exists:
-        findById(id);
+        if(!w2Repository.existsById(id)) {
+            throw new NotFoundException(environment.getProperty("w2.not.found") + " " + id);
+        }
         updatedW2.setId(id);
         return new W2Dto(w2Repository.saveAndFlush(updatedW2.mapToEntity()));
     }
@@ -88,13 +93,15 @@ public class W2Service {
     // Delete W2 by Id:
     public void deleteById(int id) {
         // Verify W2 exists:
-        findById(id);
+        if(!w2Repository.existsById(id)) {
+            throw new NotFoundException(environment.getProperty("w2.not.found") + " " + id);
+        }
         w2Repository.deleteById(id);
     }
 
     // Upload image to S3:
-    public String uploadImage(int id, byte[] image, String contentType) {
-        W2 w2 =findById(id).mapToEntity();
+    public String uploadImage(int id, byte[] image, String contentType, int userId) {
+        W2 w2 =findById(id, userId).mapToEntity();
         String imageKey = defineKey(w2, contentType);
         s3Service.uploadFile(imageKey, image);
         w2.setImageKey(imageKey);
@@ -119,8 +126,8 @@ public class W2Service {
 
     // Download image from S3:
     @SneakyThrows
-    public Resource downloadImage(int id) {
-        W2 w2 = findById(id).mapToEntity();
+    public Resource downloadImage(int id, int userId) {
+        W2 w2 = findById(id, userId).mapToEntity();
         InputStream inputStream = s3Service.getObject(w2.getImageKey());
         byte[] byteArray;
         try {

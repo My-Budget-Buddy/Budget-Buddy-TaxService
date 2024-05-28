@@ -130,13 +130,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Provides testing used in conjunction with Spring Security -->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
     <!-- Testing with in-memory db -->
     <dependency>
 			<groupId>com.h2database</groupId>

@@ -3,9 +3,12 @@ package com.skillstorm.taxservice.controllers;
 import com.skillstorm.taxservice.dtos.RefundDto;
 import com.skillstorm.taxservice.dtos.TaxReturnDeductionDto;
 import com.skillstorm.taxservice.dtos.TaxReturnDto;
+import com.skillstorm.taxservice.dtos.UserDataDto;
 import com.skillstorm.taxservice.services.TaxReturnService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -22,29 +25,30 @@ public class TaxReturnController {
         this.taxReturnService = taxReturnService;
     }
 
-    // Add new TaxReturn. All we really need is the year and userId. We will
-    // get the rest of the information as they fill out the form:
+    // Add new TaxReturn. Should at least contain the year and can be updated later. Can also contain all user info but a
+    // POST must be done before filing W2s because the TaxReturn ID is needed to associate the W2s with the TaxReturn:
     @PostMapping
-    public ResponseEntity<TaxReturnDto> addTaxReturn(@RequestBody TaxReturnDto newTaxReturn) {
-        TaxReturnDto createdTaxReturn = taxReturnService.addTaxReturn(newTaxReturn);
+    public ResponseEntity<UserDataDto> addTaxReturn(@Valid @RequestBody UserDataDto newTaxReturn, @RequestHeader("User-ID") int userId) {
+        newTaxReturn.setUserId(userId);
+        UserDataDto createdTaxReturn = taxReturnService.addTaxReturn(newTaxReturn);
         return ResponseEntity.created(URI.create("/" + createdTaxReturn.getId())).body(createdTaxReturn);
     }
 
     // Get TaxReturn by id:
     @GetMapping("/{id}")
-    public ResponseEntity<TaxReturnDto> findById(@PathVariable("id") int id) {
-        return ResponseEntity.ok(taxReturnService.findById(id));
+    public ResponseEntity<TaxReturnDto> findById(@PathVariable("id") int id, @RequestHeader("User-ID") int userId) {
+        return ResponseEntity.ok(taxReturnService.findById(id, userId));
     }
 
     // Get current federal tax refund:
     @GetMapping("/{id}/refund")
-    public ResponseEntity<RefundDto> getRefund(@PathVariable("id") int id) {
-        return ResponseEntity.ok(taxReturnService.getRefund(id));
+    public ResponseEntity<RefundDto> getRefund(@PathVariable("id") int id, @RequestHeader("User-ID") int userId) {
+        return ResponseEntity.ok(taxReturnService.getRefund(id, userId));
     }
 
     // Get all TaxReturns by userId (and optionally by year):
     @GetMapping
-    public ResponseEntity<List<TaxReturnDto>> findAllByUserId(@RequestParam("userId") int userId, @RequestParam(value = "year", required = false) Integer year) {
+    public ResponseEntity<List<TaxReturnDto>> findAllByUserId(@RequestParam(value = "year", required = false) Integer year, @RequestHeader("User-ID") int userId) {
         if(year == null) {
             return ResponseEntity.ok(taxReturnService.findAllByUserId(userId));
         }
@@ -53,14 +57,15 @@ public class TaxReturnController {
 
     // Update TaxReturn:
     @PutMapping("/{id}")
-    public ResponseEntity<TaxReturnDto> updateTaxReturn(@PathVariable("id") int id, @RequestBody TaxReturnDto updatedTaxReturn) {
+    @PreAuthorize("#userId == #updatedTaxReturn.userId")
+    public ResponseEntity<UserDataDto> updateTaxReturn(@PathVariable("id") int id, @Valid @RequestBody TaxReturnDto updatedTaxReturn, @RequestHeader("User-ID") int userId) {
         return ResponseEntity.ok(taxReturnService.updateTaxReturn(id, updatedTaxReturn));
     }
 
     // Delete TaxReturn:
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTaxReturn(@PathVariable("id") int id) {
-        taxReturnService.deleteTaxReturn(id);
+    public ResponseEntity<Void> deleteTaxReturn(@PathVariable("id") int id, @RequestHeader("User-ID") int userId) {
+        taxReturnService.deleteTaxReturn(id, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -96,9 +101,15 @@ public class TaxReturnController {
     }
 
     // Delete absolutely everything associated with a UserId in the event they delete their account:
-    @DeleteMapping("/deleteAll/{userId}")
-    public ResponseEntity<Void> deleteAllByUserId(@PathVariable("userId") int userId) {
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<Void> deleteAllByUserId(@RequestHeader("userId") int userId) {
         taxReturnService.deleteAllByUserId(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    // View all possible Filing Statuses:
+    @GetMapping("/filingStatuses")
+    public ResponseEntity<List<String>> getFilingStatuses() {
+        return ResponseEntity.ok(taxReturnService.getFilingStatuses());
     }
 }

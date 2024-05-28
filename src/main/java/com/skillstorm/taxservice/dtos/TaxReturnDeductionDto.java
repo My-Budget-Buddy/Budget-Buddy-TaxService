@@ -17,11 +17,11 @@ public class TaxReturnDeductionDto {
     private String deductionName;
     private boolean itemized;
     private BigDecimal amountSpent;
-    private BigDecimal netDeduction;
+    private BigDecimal agiLimit;
 
     public TaxReturnDeductionDto() {
         this.amountSpent = BigDecimal.ZERO.setScale(2);
-        this.netDeduction = BigDecimal.ZERO.setScale(2);
+        this.agiLimit = BigDecimal.ZERO.setScale(2);
     }
 
     public TaxReturnDeductionDto(TaxReturnDeduction taxReturnDeduction) {
@@ -31,7 +31,7 @@ public class TaxReturnDeductionDto {
         this.deductionName = taxReturnDeduction.getDeduction().getName();
         this.itemized = taxReturnDeduction.getDeduction().isItemized();
         this.amountSpent = taxReturnDeduction.getAmountSpent();
-        this.netDeduction = taxReturnDeduction.getNetDeduction();
+        this.agiLimit = taxReturnDeduction.getDeduction().getAgiLimit();
     }
 
     @JsonIgnore
@@ -40,8 +40,7 @@ public class TaxReturnDeductionDto {
         taxReturnDeduction.setId(this.id);
         taxReturnDeduction.setTaxReturn(new TaxReturn(this.taxReturn));
         taxReturnDeduction.setDeduction(new Deduction(this.deduction));
-        taxReturnDeduction.setAmountSpent(this.amountSpent);
-        taxReturnDeduction.setNetDeduction(this.netDeduction);
+        taxReturnDeduction.setAmountSpent(this.amountSpent.setScale(2, BigDecimal.ROUND_HALF_UP));
         return taxReturnDeduction;
     }
 }

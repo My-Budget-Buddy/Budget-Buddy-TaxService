@@ -15,7 +15,7 @@ eureka:
 
   #Configure hearbeat interval:
   instance:
-    leaseRenewalIntervalInSeconds: 60
+    leaseRenewalIntervalInSeconds: 30
 
 # Assign a key to register with Discovery Service:
 spring:

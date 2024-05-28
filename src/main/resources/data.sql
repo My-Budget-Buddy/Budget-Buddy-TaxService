@@ -568,16 +568,16 @@ COMMIT;
 
 BEGIN;
 -- Non-itemized deductions
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Health Savings Account', 1.00, false);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('IRA Contributions', 1.00, false);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Student Loan Interest', 1.00, false);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Educator Expenses', 1.00, false);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Health Savings Account', 3850.000, false);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('IRA Contributions', 6500.000, false);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Student Loan Interest', 90000.000, false);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Educator Expenses', 300.000, false);
 
 -- Itemized deductions
 INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Medical Expenses', 0.075, true);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('State and Local Taxes', 1.00, true);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Mortgage Interest', 1.00, true);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Charitable Contributions', 0.60, true);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Casualty Losses', 0.10, true);
-INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Miscellaneous Deductions', 1.00, true);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('State and Local Taxes', 1.000, true);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Mortgage Interest', 1.000, true);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Charitable Contributions', 0.600, true);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Casualty Losses', 0.100, true);
+INSERT INTO deduction (name, agi_limit, itemized) VALUES ('Miscellaneous Deductions', 1.000, true);
 COMMIT;

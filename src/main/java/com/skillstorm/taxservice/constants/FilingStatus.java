@@ -2,20 +2,23 @@ package com.skillstorm.taxservice.constants;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 public enum FilingStatus {
 
-    SINGLE(1), MARRIED_FILING_JOINTLY(2), MARRIED_FILING_SEPARATELY(3), HEAD_OF_HOUSEHOLD(4), WIDOW(5);
+    SINGLE(1, "Single"), MARRIED_FILING_JOINTLY(2, "Married: Filing Jointly"),
+    MARRIED_FILING_SEPARATELY(3, "Married: Filing Separately"), HEAD_OF_HOUSEHOLD(4, "Head of Household"), WIDOW(5, "Widow");
 
     // Convert String to FilingStatus. Used to translate JSON from request to Java object:
     public static FilingStatus fromString(String status) {
         return switch (status) {
-            case "SINGLE" -> SINGLE;
             case "MARRIED: FILING JOINTLY" -> MARRIED_FILING_JOINTLY;
             case "MARRIED: FILING SEPARATELY" -> MARRIED_FILING_SEPARATELY;
             case "HEAD OF HOUSEHOLD" -> HEAD_OF_HOUSEHOLD;
             case "WIDOW" -> WIDOW;
-            default -> null;
+            default -> SINGLE;
         };
     }
 
@@ -30,9 +33,21 @@ public enum FilingStatus {
         };
     }
 
-    private final int value;
+    // View list of all Filing Statuses so that front end can display them in a dropdown:
+    public static List<String> getFilingStatuses() {
+        return Arrays.stream(FilingStatus.values()).map(Enum::toString).toList();
+    }
 
-    FilingStatus(int value) {
+    private final int value;
+    private final String label;
+
+    FilingStatus(int value, String label) {
         this.value = value;
+        this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        return label;
     }
 }

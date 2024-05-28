@@ -1,10 +1,8 @@
 package com.skillstorm.taxservice.services;
 
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.skillstorm.taxservice.dtos.OtherIncomeDto;
 import com.skillstorm.taxservice.exceptions.NotFoundException;
@@ -12,6 +10,7 @@ import com.skillstorm.taxservice.models.OtherIncome;
 import com.skillstorm.taxservice.repositories.OtherIncomeRepository;
 import com.skillstorm.taxservice.repositories.TaxReturnRepository;
 import com.skillstorm.taxservice.utilities.mappers.OtherIncomeMapper;
+
 
 @Service
 public class OtherIncomeService {
@@ -60,9 +59,15 @@ public class OtherIncomeService {
     return OtherIncomeMapper.toDto(existingOtherIncome);
   }
 
+  //@Transactional
   public void deleteOtherIncome(OtherIncomeDto otherIncomeDto) {
     OtherIncome existingOtherIncome = otherIncomeRepository.findByTaxReturnId(otherIncomeDto.getTaxReturnId())
       .orElseThrow(() -> new NotFoundException(env.getProperty("otherincome.not.found") + otherIncomeDto.getTaxReturnId()));
     otherIncomeRepository.delete(existingOtherIncome);
+  }
+
+  //@Transactional
+  public void deleteOtherIncomeById(int otherIncomeId) {
+    otherIncomeRepository.deleteById(otherIncomeId);
   }
 }

@@ -21,6 +21,8 @@ import com.skillstorm.taxservice.models.taxcredits.SaversTaxCredit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,25 +35,23 @@ public class TaxCalculatorService {
     private final TaxBracketService taxBracketService;
     private final StateTaxService stateTaxService;
     private final CapitalGainsTaxService capitalGainsTaxService;
+    private final StandardDeductionService standardDeductionService;
 
     public TaxCalculatorService(TaxCreditService taxCreditService,
                                 FilingStatusService filingStatusService,
                                 TaxBracketService taxBracketService,
                                 StateTaxService stateTaxService,
-                                CapitalGainsTaxService capitalGainsTaxService) {
+                                CapitalGainsTaxService capitalGainsTaxService,
+                                StandardDeductionService standardDeductionService) {
       this.taxCreditService = taxCreditService;
       this.filingStatusService = filingStatusService;
       this.taxBracketService = taxBracketService;
       this.stateTaxService = stateTaxService;
       this.capitalGainsTaxService = capitalGainsTaxService;
+      this.standardDeductionService = standardDeductionService;
     }
 
     public TaxReturnDto calculateAll(TaxReturnDto taxReturn) {
-
-      // Reset any previous calculations
-      taxReturn.setFederalRefund(BigDecimal.ZERO);
-      taxReturn.setStateRefund(BigDecimal.ZERO);
-      taxReturn.setTotalCredits(BigDecimal.ZERO);
 
       // First, perform any income related calculations; calculating total income, then agi, then taxable income
       calculateTotalIncome(taxReturn);
@@ -59,6 +59,7 @@ public class TaxCalculatorService {
       calculateTaxableIncome(taxReturn);
 
       // Second, calculate tax liabilities
+      calculateWithholdings(taxReturn);
       calculateFederalTaxes(taxReturn);
       calculateStateTaxes(taxReturn);
       calculateCapitalGainsTax(taxReturn);
@@ -77,11 +78,10 @@ public class TaxCalculatorService {
       return taxReturn;
     }
 
-    public TaxReturnDto calculateTotalIncome(TaxReturnDto taxReturn) {
-      List<W2Dto> w2s = taxReturn.getW2s();
-      BigDecimal totalIncome = BigDecimal.ZERO;
-      totalIncome =  totalIncome.add(w2s.stream().map(W2Dto::getWages)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+  public TaxReturnDto calculateTotalIncome(TaxReturnDto taxReturn) {
+      BigDecimal totalIncome = taxReturn.getW2s().stream().map(W2Dto::getWages)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
       if (taxReturn.getOtherIncome() != null) {
         BigDecimal totalOtherIncome = taxReturn.getOtherIncome().getSum();
@@ -97,25 +97,26 @@ public class TaxCalculatorService {
     public TaxReturnDto calculateAgi(TaxReturnDto taxReturn) {
       
       // If there are no deductions to calculate, simply set AGI to the total income
-      if (taxReturn.getDeductions() == null || taxReturn.getDeductions().isEmpty()) {
+      if (taxReturn.getDeductions().isEmpty()) {
         taxReturn.setAdjustedGrossIncome(taxReturn.getTotalIncome());
         return taxReturn;
       }
 
-      // If there are deductions, subtract deductions from total income and set result to tax return's AGI
-      BigDecimal agi = taxReturn.getTotalIncome();
+      // Set deduction limits based on user's age and filing status:
+      setDeductionLimits(taxReturn);
 
-      // Get tax return's deductions
-      List<TaxReturnDeductionDto> deductions = taxReturn.getDeductions();
+      // Calculate total deductions:
+      BigDecimal totalDeductions = taxReturn.getDeductions().stream()
+              .map(deduction -> {
+                BigDecimal amountSpent = deduction.getAmountSpent();
+                BigDecimal agiLimit = deduction.getAgiLimit();
+                // Deduct the smaller of the two so we don't exceed the limit:
+                return amountSpent.min(agiLimit);
+              })
+              .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-      // Calculate total adjustments to income
-      BigDecimal totalAdjustmentsToIncome = deductions.stream()
-                                                      .filter(deduction -> !deduction.isItemized())
-                                                      .map(TaxReturnDeductionDto::getNetDeduction)
-                                                      .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-      agi = agi.subtract(totalAdjustmentsToIncome);
-
+      // AdjustedGrossIncome = TotalIncome - TotalDeductions:
+      BigDecimal agi = taxReturn.getTotalIncome().subtract(totalDeductions);
 
       // Restrict agi to be >= 0
       taxReturn.setAdjustedGrossIncome(agi.max(BigDecimal.ZERO));
@@ -123,27 +124,91 @@ public class TaxCalculatorService {
       return taxReturn;
     }
 
+    // Adjust deduction limits based on user's age and filing status
+  private void setDeductionLimits(TaxReturnDto taxReturn) {
 
-    public TaxReturnDto calculateTaxableIncome(TaxReturnDto taxReturn) {
-      // If there are no deductions to calculate, simply set taxable income to the total income
-      if (taxReturn.getDeductions() == null || taxReturn.getDeductions().isEmpty()) {
-        taxReturn.setTaxableIncome(taxReturn.getAdjustedGrossIncome());
-        return taxReturn;
+    // Calculate user's age
+    LocalDate dateOfBirth = LocalDate.parse(taxReturn.getDateOfBirth());
+    int age = (int) ChronoUnit.YEARS.between(dateOfBirth, LocalDate.now());
+
+    // Set up conditions to make the checks more readable:
+    boolean isMarriedFilingJointly = com.skillstorm.taxservice.constants.FilingStatus.MARRIED_FILING_JOINTLY.equals(taxReturn.getFilingStatus());
+    boolean is50OrOlder = age >= 50;
+    boolean is55OrOlder = age >= 55;
+    BigDecimal totalIncome = taxReturn.getTotalIncome();
+
+    // Modify agiLimits for each deduction for users matching the above conditions as applicable:
+    taxReturn.getDeductions().stream().map(deduction -> {
+      switch (deduction.getDeduction()) {
+        // Health Savings Account:
+        case 1:
+          if (isMarriedFilingJointly) {
+            deduction.setAgiLimit(BigDecimal.valueOf(7750));
+          }
+          if (is55OrOlder) {
+            deduction.setAgiLimit(deduction.getAgiLimit().add(BigDecimal.valueOf(1000)));
+          }
+          break;
+
+        // IRA Contributions:
+        case 2:
+          if (is50OrOlder) {
+            deduction.setAgiLimit(deduction.getAgiLimit().add(BigDecimal.valueOf(1000)));
+          }
+          break;
+
+        // Student Loan Interest payments:
+        case 3:
+          if (isMarriedFilingJointly) {
+            deduction.setAgiLimit(BigDecimal.valueOf(185000));
+          }
+          // For Student Loan Interest, eligibility is based on the user's adjusted income. You cannot claim
+          // the deduction if your adjusted gross income exceeds the agiLimit, but because of the way
+          // we're going to be comparing the AGI to the agiLimit in the next step, we want to set it
+          // to 0 if the Adjusted Gross Income exceeds the eligibility cap:
+          if (totalIncome.compareTo(deduction.getAgiLimit()) > 0) {
+            deduction.setAgiLimit(BigDecimal.ZERO);
+          }
+          break;
+
+        // Educator Expenses:
+        case 4:
+          if (isMarriedFilingJointly) {
+            deduction.setAgiLimit(deduction.getAgiLimit().multiply(BigDecimal.valueOf(2)));
+          }
+          break;
+
       }
+      return deduction;
+    });
+  }
 
-      // If there are deductions, subtract deductions from total income and set result to tax return's taxable income
-      BigDecimal taxableIncome = taxReturn.getTotalIncome();
 
-      // Get tax return's deductions
-      List<TaxReturnDeductionDto> deductions = taxReturn.getDeductions();
+  public TaxReturnDto calculateTaxableIncome(TaxReturnDto taxReturn) {
 
-      // Calculate total itemized deductions
-      BigDecimal totalItemizedDeductions = deductions.stream()
-                                                    .filter(TaxReturnDeductionDto::isItemized)
-                                                    .map(TaxReturnDeductionDto::getNetDeduction)
-                                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+      // Calculate total itemized deductions. Here, agiLimit represents the percentage of the user's agi that can be deducted from
+      // a single claim:
+      BigDecimal totalItemizedDeductions = taxReturn.getDeductions().stream()
+              .filter(TaxReturnDeductionDto::isItemized)
+              .map(deduction -> {
+                BigDecimal adjustedGrossIncome = taxReturn.getAdjustedGrossIncome();
+                BigDecimal maxDeduction = adjustedGrossIncome.multiply(deduction.getAgiLimit());
+                BigDecimal amountSpent = deduction.getAmountSpent();
+                return amountSpent.min(maxDeduction);
+              })
+              .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-      taxableIncome = taxableIncome.subtract(totalItemizedDeductions);
+      // Get the standard deduction amount based on user's filing status:
+      BigDecimal standardDeduction =
+              BigDecimal.valueOf(standardDeductionService.getByFilingStatusId(taxReturn.getFilingStatus().getValue())
+                      .getDeductionAmount());
+
+      // Note: We choose the greater of standard deduction vs itemized deductions. We may want to find a way to
+      // communicate which choice was made to the user in the future:
+      BigDecimal totalDeductions = totalItemizedDeductions.max(standardDeduction);
+
+      // TaxableIncome = AdjustedGrossIncome - TotalDeductions:
+      BigDecimal taxableIncome = taxReturn.getAdjustedGrossIncome().subtract(totalDeductions);
 
       // Restrict taxable income to be >= 0
       taxReturn.setTaxableIncome(taxableIncome.max(BigDecimal.ZERO));
@@ -152,11 +217,44 @@ public class TaxCalculatorService {
     }
 
 
+  // Calculate taxes already withheld:
+  private void calculateWithholdings(TaxReturnDto taxReturn) {
+
+    // Calculate total federal taxes already paid:
+    taxReturn.setFedTaxWithheld(taxReturn.getW2s().stream()
+            .map(W2Dto::getFederalIncomeTaxWithheld)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .setScale(2, RoundingMode.HALF_UP));
+
+    // Calculate total social security taxes already paid:
+    taxReturn.setSocialSecurityTaxWithheld(taxReturn.getW2s().stream()
+            .map(W2Dto::getSocialSecurityTaxWithheld)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .setScale(2, RoundingMode.HALF_UP));
+
+    // Calculate total medicare taxes already paid:
+    taxReturn.setMedicareTaxWithheld(taxReturn.getW2s().stream()
+            .map(W2Dto::getMedicareTaxWithheld)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .setScale(2, RoundingMode.HALF_UP));
+
+    // Calculate total state taxes already paid:
+    taxReturn.setStateTaxWithheld(taxReturn.getW2s().stream()
+            .map(W2Dto::getStateIncomeTaxWithheld)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .setScale(2, RoundingMode.HALF_UP));
+  }
+
+
     // Calculate total federal tax liability
     public TaxReturnDto calculateFederalTaxes(TaxReturnDto taxReturn) {
 
-      // If taxable income is 0, simply return
+      // Calculate total federal income taxes already paid:
+      BigDecimal taxesPaid = taxReturn.getFedTaxWithheld();
+
+      // If taxable income is 0, refund all income taxes paid:
       if (taxReturn.getTaxableIncome().compareTo(BigDecimal.ZERO) <= 0) {
+        taxReturn.setFederalRefund(taxesPaid);
         return taxReturn;
       }
 
@@ -167,7 +265,7 @@ public class TaxCalculatorService {
       List<TaxBracket> taxBrackets = taxBracketService.findByFilingStatusID(taxReturn.getFilingStatus().getValue());
 
       // Initialize tax amount & remaining income
-      BigDecimal totalTaxes = BigDecimal.ZERO;
+      BigDecimal taxesOwed = BigDecimal.ZERO;
       BigDecimal remainingIncome = taxableIncome;
 
       // Calculate the tax amount at each bracket user's income falls into
@@ -182,13 +280,13 @@ public class TaxCalculatorService {
 
           BigDecimal taxableAmountInBracket = remainingIncome.min(BigDecimal.valueOf(maxIncome - minIncome));
           BigDecimal taxInBracket = taxableAmountInBracket.multiply(taxRate);
-          totalTaxes = totalTaxes.add(taxInBracket);
+          taxesOwed = taxesOwed.add(taxInBracket);
           remainingIncome = remainingIncome.subtract(taxableAmountInBracket);
       }
 
       // Set the federal tax amount in the TaxReturnDto
-      taxReturn.setFederalRefund(taxReturn.getFederalRefund()
-                                          .subtract(totalTaxes));
+      taxReturn.setFederalRefund(taxesPaid
+                                          .subtract(taxesOwed));
 
       // Return the total federal tax liability
       return taxReturn;
@@ -197,22 +295,16 @@ public class TaxCalculatorService {
 
     // Calculate total state tax liability
     public TaxReturnDto calculateStateTaxes(TaxReturnDto taxReturn) {
-      // Get tax return's W2s
-      List<W2Dto> w2s = taxReturn.getW2s();
 
       // Determine the tax return's state
       State taxReturnState = taxReturn.getState();
 
       // Group W2s by state
-      Map<State, List<W2Dto>> w2sByState = w2s.stream()
+      Map<State, List<W2Dto>> w2sByState = taxReturn.getW2s().stream()
         .collect(Collectors.groupingBy(W2Dto::getState));
 
-      // Initialize tax amounts and withheld amounts
+      // Initialize tax amount:
       BigDecimal totalTaxAmount = BigDecimal.ZERO;
-      BigDecimal totalStateTaxWithheld = BigDecimal.ZERO;
-      BigDecimal totalFedTaxWithheld = BigDecimal.ZERO;
-      BigDecimal totalSocialSecurityTaxWithheld = BigDecimal.ZERO;
-      BigDecimal totalMedicareTaxWithheld = BigDecimal.ZERO;
 
       // Calculate taxes for each group of W2s by state
       for (Map.Entry<State, List<W2Dto>> entry : w2sByState.entrySet()) {
@@ -225,15 +317,14 @@ public class TaxCalculatorService {
                                                   .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // Check if the state matches the tax return's state
-        if (state.equals(taxReturnState)) {
+        if (state.equals(taxReturnState) && taxReturn.getOtherIncome() != null) {
 
           // Include OtherIncome values in the total state wages
-          if (taxReturn.getOtherIncome() != null) {
-              totalWagesForState = totalWagesForState.add(taxReturn.getOtherIncome().getOtherInvestmentIncome()
-                                                      .add(taxReturn.getOtherIncome().getNetBusinessIncome())
-                                                      .add(taxReturn.getOtherIncome().getAdditionalIncome())
-                                                      .add(taxReturn.getOtherIncome().getShortTermCapitalGains()));
-          }
+
+          totalWagesForState = totalWagesForState.add(taxReturn.getOtherIncome().getOtherInvestmentIncome()
+                  .add(taxReturn.getOtherIncome().getNetBusinessIncome())
+                  .add(taxReturn.getOtherIncome().getAdditionalIncome())
+                  .add(taxReturn.getOtherIncome().getShortTermCapitalGains()));
         }
 
         // Calculate state tax for the total wages of the state
@@ -241,21 +332,6 @@ public class TaxCalculatorService {
 
         // Update total state tax amount
         totalTaxAmount = totalTaxAmount.add(stateTaxForState);
-
-        // Calculate total state tax withheld for the state
-        BigDecimal totalStateTaxWithheldForState = w2sForState.stream()
-                                                              .map(W2Dto::getStateIncomeTaxWithheld)
-                                                              .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // Update total state tax withheld
-        totalStateTaxWithheld = totalStateTaxWithheld.add(totalStateTaxWithheldForState);
-      }
-  
-      // Iterate over W2s to calculate total amounts
-      for (W2Dto w2 : w2s) {
-        totalFedTaxWithheld = totalFedTaxWithheld.add(w2.getFederalIncomeTaxWithheld());
-        totalSocialSecurityTaxWithheld = totalSocialSecurityTaxWithheld.add(w2.getSocialSecurityTaxWithheld());
-        totalMedicareTaxWithheld = totalMedicareTaxWithheld.add(w2.getMedicareTaxWithheld());
       }
   
       // If the tax return's state does not match any of the W2s' states,
@@ -273,13 +349,9 @@ public class TaxCalculatorService {
       }
   
       // Set results in the relevant DTO fields
-      taxReturn.setStateRefund(taxReturn.getStateRefund()
-                                        .subtract(totalTaxAmount)
-                                        .setScale(2, RoundingMode.HALF_UP));
-      taxReturn.setFedTaxWithheld(totalFedTaxWithheld.setScale(2, RoundingMode.HALF_UP));
-      taxReturn.setStateTaxWithheld(totalStateTaxWithheld.setScale(2, RoundingMode.HALF_UP));
-      taxReturn.setSocialSecurityTaxWithheld(totalSocialSecurityTaxWithheld.setScale(2, RoundingMode.HALF_UP));
-      taxReturn.setMedicareTaxWithheld(totalMedicareTaxWithheld.setScale(2, RoundingMode.HALF_UP));
+      taxReturn.setStateRefund(taxReturn.getStateTaxWithheld()
+              .subtract(totalTaxAmount)
+              .setScale(2, RoundingMode.HALF_UP));
   
       // Return updated tax return
       return taxReturn;

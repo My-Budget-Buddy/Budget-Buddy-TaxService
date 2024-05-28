@@ -8,6 +8,10 @@ import com.skillstorm.taxservice.models.TaxReturn;
 import com.skillstorm.taxservice.utilities.mappers.OtherIncomeMapper;
 import com.skillstorm.taxservice.utilities.mappers.TaxReturnCreditMapper;
 
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -18,19 +22,39 @@ import java.util.List;
 public class TaxReturnDto {
 
     private int id;
+
+    @Min(value = 2015, message = "{year.must}")
     private int year;
+
     private int userId;
+
     private FilingStatus filingStatus;
+
+    @Size(min = 1, max = 50, message = "{firstName.size}")
     private String firstName;
+
+    @Size(min = 1, max = 50, message = "{lastName.size}")
     private String lastName;
+
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "{email.invalid}")
     private String email;
+
+    @Pattern(regexp = "^\\d{3}-\\d{3}-\\d{4}$", message = "{phone.invalid}")
     private String phoneNumber;
+
     private String address;
     private String city;
     private State state;
+
+    @Pattern(regexp = "^\\d{5}$", message = "{zip.invalid}")
     private String zip;
+
+    @Pattern(regexp = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$", message = "{date.invalid}")
     private String dateOfBirth;
+
+    @Pattern(regexp = "^\\d{3}-\\d{2}-\\d{4}$", message = "{ssn.invalid}")
     private String ssn;
+
     private List<W2Dto> w2s;
     private List<TaxReturnDeductionDto> deductions;
     private OtherIncomeDto otherIncome;

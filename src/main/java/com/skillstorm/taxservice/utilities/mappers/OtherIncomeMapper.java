@@ -13,6 +13,7 @@ public class OtherIncomeMapper {
     if (otherIncome != null) {
       OtherIncomeDto dto = new OtherIncomeDto();
 
+      dto.setId(otherIncome.getId());
       dto.setTaxReturnId(otherIncome.getTaxReturn().getId());
       dto.setLongTermCapitalGains(otherIncome.getLongTermCapitalGains());
       dto.setShortTermCapitalGains(otherIncome.getShortTermCapitalGains());
@@ -31,9 +32,7 @@ public class OtherIncomeMapper {
     if (dto != null) {
       OtherIncome entity = new OtherIncome();
 
-      /* TaxReturn taxReturn = repo.findById(dto.getTaxReturnId())
-        .orElseThrow(() -> new IllegalArgumentException("no tax return exists with id: " + dto.getTaxReturnId()));
-      entity.setTaxReturn(taxReturn); */
+      entity.setId(dto.getId());
       TaxReturn taxReturn = new TaxReturn();
       taxReturn.setId(dto.getTaxReturnId());
       entity.setTaxReturn(taxReturn);

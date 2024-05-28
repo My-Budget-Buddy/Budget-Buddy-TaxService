@@ -27,7 +27,4 @@ public class TaxReturnDeduction {
 
     @Column(name = "amount_spent")
     private BigDecimal amountSpent;
-
-    @Column(name = "net_deduction")
-    private BigDecimal netDeduction;
 }

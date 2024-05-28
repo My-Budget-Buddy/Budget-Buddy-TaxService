@@ -20,6 +20,10 @@ public class Deduction {
 
     private String name;
 
+    // For itemized deductions, the AGI limit is a percentage of the taxpayer's AGI
+    // For standard deductions, the AGI limit is either a flat amount or the maximum
+    // AGI the taxpayer can have to claim the deduction:
+    @Column(name = "agi_limit")
     private BigDecimal agiLimit;
 
     private boolean itemized;
