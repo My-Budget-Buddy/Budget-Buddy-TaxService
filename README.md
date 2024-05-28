@@ -116,7 +116,7 @@ Tax Service API, it functions as follows:
    "ssn": "[xxx-xx-xxxx]"
  }
 ```
-3. Note: This will replace everything that was previously stored, even fields not included in this request.
+3. Note: This will replace everything that was previously stored. Fields not included in this request will be set to `null`.
 
 ### Find and view the current state of a Tax Return:
 1. `GET http://localhost:8084/taxes/taxreturns/{taxreturnId}`
