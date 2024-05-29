@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 import static software.amazon.awssdk.utils.IoUtils.toByteArray;
 
@@ -102,26 +103,11 @@ public class W2Service {
     // Upload image to S3:
     public String uploadImage(int id, byte[] image, String contentType, int userId) {
         W2 w2 =findById(id, userId).mapToEntity();
-        String imageKey = defineKey(w2, contentType);
+        String imageKey = UUID.nameUUIDFromBytes(image).toString() + "." + contentType.split("/")[1];
         s3Service.uploadFile(imageKey, image);
         w2.setImageKey(imageKey);
         w2Repository.saveAndFlush(w2);
         return imageKey;
-    }
-
-    // Utility method to build an image key based on the W2.
-    // May need to update the key format in order to store image prior to
-    // saving the W2 entity because the W2 entity may not have an ID yet:
-    private String defineKey(W2 w2, String contentType) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("w2s/");
-        sb.append(w2.getUserId());
-        sb.append("/");
-        sb.append(w2.getId());
-        sb.append(".");
-        sb.append(contentType.split("/")[1]);
-
-        return sb.toString();
     }
 
     // Download image from S3:
@@ -133,7 +119,7 @@ public class W2Service {
         try {
             byteArray = toByteArray(inputStream);
         } catch (IOException e) {
-            throw new UnableToReadStreamException("stream.read.unable");
+            throw new UnableToReadStreamException(environment.getProperty("stream.read.unable"));
         }
 
         return new ByteArrayResource(byteArray);
