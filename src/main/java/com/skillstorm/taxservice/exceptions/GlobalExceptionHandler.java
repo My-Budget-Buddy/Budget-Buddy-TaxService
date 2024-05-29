@@ -1,5 +1,7 @@
 package com.skillstorm.taxservice.exceptions;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
@@ -10,7 +12,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -26,8 +30,11 @@ public class GlobalExceptionHandler {
 
     // Handle NotFoundException from querying dbs for resources that do not exist:
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(NotFoundException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<ErrorMessage> handleNotFoundException(NotFoundException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(e.getMessage());
+        return ResponseEntity.badRequest().body(error);
     }
 
     // Handle Bad Requests from trying to add or update entities with invalid data in the RequestBody:
@@ -38,7 +45,28 @@ public class GlobalExceptionHandler {
         error.setMessage(e.getBindingResult().getFieldErrors().stream()
                 .map(FieldError::getDefaultMessage).collect(Collectors.joining(", ")));
 
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    // Handle Constraint Violation Exceptions that occur from methods updating entities with invalid data:
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorMessage> handleConstraintViolationExceptions(ConstraintViolationException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage).collect(Collectors.joining(", ")));
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // Handle Bad Requests from trying to add or update entities with invalid data in the RequestBody:
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorMessage> handleValidationExceptions(HandlerMethodValidationException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(Arrays.stream(e.getDetailMessageArguments()).map(Object::toString).collect(Collectors.joining(", ")));
+
+        return ResponseEntity.badRequest().body(error);
     }
 
     // Handle User trying to insert duplicate data (multiple tax returns for the same year,
@@ -54,30 +82,54 @@ public class GlobalExceptionHandler {
 
     // Handle UnauthorizedException from trying to access resources not owned by the user::
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<String> handleUnauthorizedException(UnauthorizedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    public ResponseEntity<ErrorMessage> handleUnauthorizedException(UnauthorizedException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.FORBIDDEN.value());
+        error.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<ErrorMessage> handleIllegalArgumentException(IllegalArgumentException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(e.getMessage());
+        return ResponseEntity.badRequest().body(error);
     }
 
     // Handle UnableToReadStreamException from errors reading from InputStream:
     @ExceptionHandler(UnableToReadStreamException.class)
-    public ResponseEntity<String> handleUnableToReadStreamException(UnableToReadStreamException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<ErrorMessage> handleUnableToReadStreamException(UnableToReadStreamException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(e.getMessage());
+        return ResponseEntity.badRequest().body(error);
     }
 
     // Handle UndeterminedContentException from errors reading from InputStream:
     @ExceptionHandler(UndeterminedContentException.class)
-    public ResponseEntity<String> handleUndeterminedContentException(UndeterminedContentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<ErrorMessage> handleUndeterminedContentException(UndeterminedContentException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(e.getMessage());
+        return ResponseEntity.badRequest().body(error);
     }
 
-    // Handle IllegalAccessError from trying to sum other income fields
+    // Handle IllegalAccessError from trying to sum other income fields:
     @ExceptionHandler(IllegalAccessException.class)
-    public ResponseEntity<String> handleIllegalAccessError(IllegalAccessException e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<ErrorMessage> handleIllegalAccessError(IllegalAccessException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(error.getMessage());
+      return ResponseEntity.badRequest().body(error);
   }
+
+    // Everything else:
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorMessage> handleGeneralExceptions(Exception e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        error.setMessage("An internal server error has occurred. Please try again later.");
+        return ResponseEntity.internalServerError().body(error);
+    }
 }
