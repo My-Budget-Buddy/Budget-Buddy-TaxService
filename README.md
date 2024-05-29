@@ -311,11 +311,9 @@ contributions when you make the claim.
 
 ### Edit Tax Return Deductions:
 1. Edit a claimed deduction using the Tax Return Deduction ID: `PUT http://localhost:8084/taxes/taxreturns/{id}/deductions`
-2. Be sure to include the TaxReturnId in the request body:
+2. We only edit the amount spent. Completely changing the type of deduction was deemed to fall outside of the scope of an edit:
 ```
  {
-     "taxReturn": [taxreturnId],
-     "deduction": [deductionId],
      "amountSpent": [Amount of money spent]
  }
 ```
