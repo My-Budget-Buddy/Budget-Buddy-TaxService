@@ -51,7 +51,7 @@ public class W2Service {
     @PostAuthorize("returnObject.userId == #userId")
     public W2Dto findById(int id, int userId) {
         return new W2Dto(w2Repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(environment.getProperty("w2.not.found") + " " + id)));
+                .orElseThrow(() -> new NotFoundException(environment.getProperty("w2.not.found"), id)));
     }
 
     // Find all W2s by UserId:
@@ -74,7 +74,7 @@ public class W2Service {
     public W2Dto updateById(int id, W2Dto updatedW2) {
         // Verify W2 exists:
         if(!w2Repository.existsById(id)) {
-            throw new NotFoundException(environment.getProperty("w2.not.found") + " " + id);
+            throw new NotFoundException(environment.getProperty("w2.not.found"), id);
         }
         updatedW2.setId(id);
         return new W2Dto(w2Repository.saveAndFlush(updatedW2.mapToEntity()));
@@ -95,7 +95,7 @@ public class W2Service {
     public void deleteById(int id) {
         // Verify W2 exists:
         if(!w2Repository.existsById(id)) {
-            throw new NotFoundException(environment.getProperty("w2.not.found") + " " + id);
+            throw new NotFoundException(environment.getProperty("w2.not.found"), id);
         }
         w2Repository.deleteById(id);
     }

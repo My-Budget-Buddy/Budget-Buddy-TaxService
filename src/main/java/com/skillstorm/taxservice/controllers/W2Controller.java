@@ -79,14 +79,16 @@ public class W2Controller {
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(imageResource);
     }
 
-    // Utility method to determine content type of returned image (image/png, image/jpg, application/pdf, etc):
+    // Utility method to determine content type of returned image (image/png, image/jpg, application/pdf, etc).
+    // Probably unnecessary because we parsed the content type on the way in and used it to name the key,
+    // but leaving it here anyway:
     @SneakyThrows
     private String determineContentType(Resource imageResource) {
         Tika tika = new Tika();
         try {
             return tika.detect(imageResource.getInputStream());
         } catch (IOException e) {
-            throw new UndeterminedContentException("unknown.content");
+            throw new UndeterminedContentException("{unknown.content}");
         }
     }
 }
