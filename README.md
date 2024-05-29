@@ -41,6 +41,7 @@ To-Do List:
    * DATABASE_URL: The URL for the PostgreSQL-compatible database you are using
    * DATABASE_USER: The username needed to authenticate with your database
    * DATABASE_PASS: The password needed to authenticate with your database
+   * IMAGE_BUCKET: Name of the AWS S3 bucket used to store uploaded W2 files
 
 4. Create a PostgreSQL database with the name: `tax-service`
 
