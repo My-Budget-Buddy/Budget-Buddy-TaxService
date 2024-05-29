@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TaxReturnCreditDto {
 
+  private int id;
   private int taxReturnId;
   private int numDependents = 0;
   private int numDependentsAotc = 0;
