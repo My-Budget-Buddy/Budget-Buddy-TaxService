@@ -1,16 +1,10 @@
 package com.skillstorm.taxservice.services;
 
+import com.skillstorm.taxservice.dtos.*;
+import com.skillstorm.taxservice.models.*;
 import org.springframework.stereotype.Service;
 
 import com.skillstorm.taxservice.constants.State;
-import com.skillstorm.taxservice.dtos.TaxReturnCreditDto;
-import com.skillstorm.taxservice.dtos.TaxReturnDeductionDto;
-import com.skillstorm.taxservice.dtos.TaxReturnDto;
-import com.skillstorm.taxservice.dtos.W2Dto;
-import com.skillstorm.taxservice.models.CapitalGainsTax;
-import com.skillstorm.taxservice.models.FilingStatus;
-import com.skillstorm.taxservice.models.StateTax;
-import com.skillstorm.taxservice.models.TaxBracket;
 import com.skillstorm.taxservice.models.taxcredits.ChildTaxCredit;
 import com.skillstorm.taxservice.models.taxcredits.DependentCareTaxCredit;
 import com.skillstorm.taxservice.models.taxcredits.DependentCareTaxCreditLimit;
@@ -36,19 +30,22 @@ public class TaxCalculatorService {
     private final StateTaxService stateTaxService;
     private final CapitalGainsTaxService capitalGainsTaxService;
     private final StandardDeductionService standardDeductionService;
+    private final DeductionService deductionService;
 
     public TaxCalculatorService(TaxCreditService taxCreditService,
                                 FilingStatusService filingStatusService,
                                 TaxBracketService taxBracketService,
                                 StateTaxService stateTaxService,
                                 CapitalGainsTaxService capitalGainsTaxService,
-                                StandardDeductionService standardDeductionService) {
+                                StandardDeductionService standardDeductionService,
+                                DeductionService deductionService) {
       this.taxCreditService = taxCreditService;
       this.filingStatusService = filingStatusService;
       this.taxBracketService = taxBracketService;
       this.stateTaxService = stateTaxService;
       this.capitalGainsTaxService = capitalGainsTaxService;
       this.standardDeductionService = standardDeductionService;
+      this.deductionService = deductionService;
     }
 
     public TaxReturnDto calculateAll(TaxReturnDto taxReturn) {
@@ -137,30 +134,41 @@ public class TaxCalculatorService {
     boolean is55OrOlder = age >= 55;
     BigDecimal totalIncome = taxReturn.getTotalIncome();
 
+    // Reset agiLimits to their default values to avoid compounding:
+    resetAgiLimits(taxReturn);
+
     // Modify agiLimits for each deduction for users matching the above conditions as applicable:
-    taxReturn.getDeductions().stream().map(deduction -> {
-      switch (deduction.getDeduction()) {
+    for(TaxReturnDeductionDto deduction : taxReturn.getDeductions()) {
+
+      int deductionId = deduction.getDeduction();
+      BigDecimal agiLimit = deduction.getAgiLimit();
+
+      switch (deductionId) {
         // Health Savings Account:
         case 1:
           if (isMarriedFilingJointly) {
-            deduction.setAgiLimit(BigDecimal.valueOf(7750));
+            agiLimit = agiLimit
+                    .multiply(BigDecimal.valueOf(2))
+                    .add(BigDecimal.valueOf(50));
           }
           if (is55OrOlder) {
-            deduction.setAgiLimit(deduction.getAgiLimit().add(BigDecimal.valueOf(1000)));
+            agiLimit = agiLimit.add(BigDecimal.valueOf(1000));
           }
           break;
 
         // IRA Contributions:
         case 2:
           if (is50OrOlder) {
-            deduction.setAgiLimit(deduction.getAgiLimit().add(BigDecimal.valueOf(1000)));
+            agiLimit = agiLimit.add(BigDecimal.valueOf(1000));
           }
           break;
 
         // Student Loan Interest payments:
         case 3:
           if (isMarriedFilingJointly) {
-            deduction.setAgiLimit(BigDecimal.valueOf(185000));
+            agiLimit = agiLimit
+                    .multiply(BigDecimal.valueOf(2))
+                    .add(BigDecimal.valueOf(5000));
           }
           // For Student Loan Interest, eligibility is based on the user's adjusted income. You cannot claim
           // the deduction if your adjusted gross income exceeds the agiLimit, but because of the way
@@ -179,8 +187,16 @@ public class TaxCalculatorService {
           break;
 
       }
-      return deduction;
-    });
+      deduction.setAgiLimit(agiLimit);
+    };
+  }
+
+  // Reset AGI Limit to base value:
+  private void resetAgiLimits(TaxReturnDto taxReturn) {
+      taxReturn.getDeductions().forEach(taxReturnDeduction -> {
+        DeductionDto deduction = deductionService.findById(taxReturnDeduction.getDeduction());
+        taxReturnDeduction.setAgiLimit(deduction.getAgiLimit());
+      });
   }
 
 

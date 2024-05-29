@@ -81,11 +81,11 @@ class TaxReturnCreditServiceTest {
 
     @Test
     void testDeleteTaxReturnCredit() {
-      when(taxReturnCreditRepository.findByTaxReturnId(taxReturnCreditDto.getTaxReturnId())).thenReturn(Optional.of(taxReturnCredit));
+      when(taxReturnCreditRepository.existsById(taxReturnCreditDto.getTaxReturnId())).thenReturn(true);
 
-      taxReturnCreditService.deleteTaxReturnCredit(taxReturnCreditDto);
+      taxReturnCreditService.deleteTaxReturnCredit(1);
 
-      verify(taxReturnCreditRepository).delete(taxReturnCredit);
+      verify(taxReturnCreditRepository).deleteById(1);
     }
 
     // Setup method

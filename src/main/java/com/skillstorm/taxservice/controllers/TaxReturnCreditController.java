@@ -38,9 +38,9 @@ public class TaxReturnCreditController {
     return ResponseEntity.ok(taxReturnCreditService.updateTaxReturnCredit(taxReturnCreditDto));
   }
 
-  @DeleteMapping()
-  public ResponseEntity<Void> deleteTaxReturnCredit(@RequestBody TaxReturnCreditDto taxReturnCreditDto) {
-    taxReturnCreditService.deleteTaxReturnCredit(taxReturnCreditDto);
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteTaxReturnCredit(@PathVariable("id") int id) {
+    taxReturnCreditService.deleteTaxReturnCredit(id);
     return ResponseEntity.noContent().build();
   }
 }

@@ -59,9 +59,10 @@ public class TaxReturnCreditService {
     return TaxReturnCreditMapper.toDto(existingTaxReturnCredit);
   }
 
-  public void deleteTaxReturnCredit(TaxReturnCreditDto taxReturnCreditDto) {
-    TaxReturnCredit existingTaxReturnCredit = taxReturnCreditRepository.findByTaxReturnId(taxReturnCreditDto.getTaxReturnId())
-      .orElseThrow(() -> new NotFoundException(environment.getProperty("taxreturncredit.not.found") + taxReturnCreditDto.getTaxReturnId()));
-    taxReturnCreditRepository.delete(existingTaxReturnCredit);
+  public void deleteTaxReturnCredit(int id) {
+    if(!taxReturnCreditRepository.existsById(id)) {
+      throw new NotFoundException(environment.getProperty("taxreturncredit.not.found") + id);
+    }
+    taxReturnCreditRepository.deleteById(id);
   }
 }

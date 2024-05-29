@@ -10,6 +10,6 @@ import com.skillstorm.taxservice.models.TaxReturnCredit;
 @Repository
 public interface TaxReturnCreditRepository extends JpaRepository<TaxReturnCredit, Integer> {
 
-  public Optional<TaxReturnCredit> findByTaxReturnId(int id);
+   Optional<TaxReturnCredit> findByTaxReturnId(int id);
 
 }
