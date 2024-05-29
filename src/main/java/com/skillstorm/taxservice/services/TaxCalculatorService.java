@@ -134,7 +134,8 @@ public class TaxCalculatorService {
     boolean is55OrOlder = age >= 55;
     BigDecimal totalIncome = taxReturn.getTotalIncome();
 
-    // Reset agiLimits to their default values to avoid compounding:
+    // Reset agiLimits to their default values to avoid compounding. Might be unnecessary because
+    // the changes may not be being saved anywhere:
     resetAgiLimits(taxReturn);
 
     // Modify agiLimits for each deduction for users matching the above conditions as applicable:

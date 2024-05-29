@@ -60,7 +60,10 @@ public class TaxCalculatorServiceTest {
   private TaxCreditService taxCreditService;
 
   @Mock
-    private StandardDeductionService standardDeductionService;
+  private StandardDeductionService standardDeductionService;
+
+  @Mock
+  private DeductionService deductionService;
 
   @InjectMocks
   private TaxCalculatorService taxCalculatorService;

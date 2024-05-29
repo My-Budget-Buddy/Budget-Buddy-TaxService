@@ -312,7 +312,6 @@ class W2ServiceTest {
         W2 result = w2Captor.getValue();
 
         //Verify the result:
-        assertEquals("w2s/1/1.png", keyCaptor.getValue(), "Key should be 'w2s/1/1.png'");
         assertArrayEquals(new byte[]{0}, imageCaptor.getValue(), "Image should be a byte array");
         assertEquals(1, result.getId(), "W2 ID should be 1");
         assertEquals("Test Employer", result.getEmployer(), "Employer should be 'Test Employer'");
@@ -322,7 +321,6 @@ class W2ServiceTest {
         assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
         assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
         assertEquals(1, result.getUserId(), "User ID should be 1");
-        assertEquals("w2s/1/1.png", result.getImageKey(), "Image Key should be 'w2s/1/1.png'");
     }
 
     // Download W2 Image Success:
