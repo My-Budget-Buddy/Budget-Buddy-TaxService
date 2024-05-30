@@ -5,6 +5,7 @@ import com.skillstorm.taxservice.dtos.*;
 import com.skillstorm.taxservice.exceptions.DuplicateDataException;
 import com.skillstorm.taxservice.exceptions.NotFoundException;
 import com.skillstorm.taxservice.exceptions.UnauthorizedException;
+import com.skillstorm.taxservice.models.TaxReturn;
 import com.skillstorm.taxservice.repositories.TaxReturnDeductionRepository;
 import com.skillstorm.taxservice.repositories.TaxReturnRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,5 +154,12 @@ public class TaxReturnService {
     // Get all filing statuses::
     public List<String> getFilingStatuses() {
         return FilingStatus.getFilingStatuses();
+    }
+
+    // Submit a  completed TaxReturn:
+    public RefundDto submitTaxReturn(int id, int userId) {
+        TaxReturnDto taxReturnDto = findById(id, userId);
+        TaxReturn completedTaxReturn = taxReturnRepository.saveAndFlush(taxReturnDto.mapToEntity());
+        return new RefundDto(completedTaxReturn.getFederalRefund(), completedTaxReturn.getStateRefund());
     }
 }
