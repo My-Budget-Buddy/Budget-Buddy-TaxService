@@ -366,6 +366,21 @@ contributions when you make the claim.
 1. Edit a user's tax return's credit information with: `PUT http://localhost:8084/taxes/tax-return-credit`
 2. Using the same request body format as submitting tax credit information, editing tax credit will simply update the tax return's tax credit values with the supplied values, leaving other values unchanged.
 
+### Submitting a Tax Return:
+1. When all data has been entered, the final state of the tax return can be submitted to the database using it's ID: `POST http://localhost:8084/taxes/taxreturns/1/submit`
+2. No request body is necessary as all of the related financial data is saved as each form is created.
+3. At the moment there is no separate archive table or completion flag on the tax return but this will ensure that past submissions are viewable with the financial details set as they were entered at the time
+   of submission.
+4. The response body from a submission is the same lightweight refund object used to track the current refund estimate throughout the process:
+```
+  {
+    {
+    "federalRefund": [amount],
+    "stateRefund": [amount]
+}
+  }
+```
+
 ## Contributors
 * Quentin Hardwick
 * Fawaz Alharbi
