@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorMessage> handleGeneralExceptions(Exception e) {
         ErrorMessage error = new ErrorMessage();
         error.setErrorCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        error.setMessage("An internal server error has occurred. Please try again later.");
+        error.setMessage(e.getMessage());
         return ResponseEntity.internalServerError().body(error);
     }
 }
