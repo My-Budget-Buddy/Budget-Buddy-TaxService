@@ -11,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "taxreturn_credit")
+@Table(name = "taxreturn_credit",
+  uniqueConstraints = @UniqueConstraint(columnNames = {"tax_return_id"}))
 public class TaxReturnCredit {
   
   @Id

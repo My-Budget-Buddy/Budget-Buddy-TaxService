@@ -114,4 +114,10 @@ public class TaxReturnController {
     public ResponseEntity<List<String>> getFilingStatuses() {
         return ResponseEntity.ok(taxReturnService.getFilingStatuses());
     }
+
+    // Submit completed TaxReturn:
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<RefundDto> submitTaxReturn(@PathVariable("id") int id, @RequestHeader("User-ID") int userId) {
+        return ResponseEntity.ok(taxReturnService.submitTaxReturn(id, userId));
+    }
 }
