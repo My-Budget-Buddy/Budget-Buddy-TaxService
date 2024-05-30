@@ -41,6 +41,7 @@ To-Do List:
    * DATABASE_URL: The URL for the PostgreSQL-compatible database you are using
    * DATABASE_USER: The username needed to authenticate with your database
    * DATABASE_PASS: The password needed to authenticate with your database
+   * IMAGE_BUCKET: Name of the AWS S3 bucket used to store uploaded W2 files
 
 4. Create a PostgreSQL database with the name: `tax-service`
 
@@ -191,6 +192,28 @@ Tax Service API, it functions as follows:
 ```
 4. This will replace the previously created list with the one submitted here.
 
+### Upload an image of a W2 to S3:
+1. Note: S3 bucket names are globally unique. The value of the PHOTO_BUCKET environment variable must match a bucket in the region defined in the S3Config.java class:
+```
+  @Configuration
+  public class S3Config {
+  
+      @Bean
+      public S3Client s3() {
+          return S3Client.builder().region(Region.US_EAST_1).build();
+      }
+  }
+```
+2. `POST` to `http://localhost:8084/taxes/w2s/{w2Id}/image`
+3. With a `byte[]` object in the request body. If using Postman you do this by navigating to Body and selectng the `binary` radio button.
+4. Upload the image from your local machine. Multiple formats supported: jpg, png, pdf, etc.
+5. You should receive a `201 Created` on success.
+6. The image key should now be appended to the W2 entity if you need further confirmation.
+7. Note: Given the current path dependency on the w2Id, the W2 must be created prior to uploading an image to it.
+
+### Downloading the image
+1. To retrieve the image after it has been stored, we use the w2Id to make a `GET` request to same place uri where it was posted: `GET http://localhost:8084/taxes/w2s/{w2Id}/image`.
+
 ### Deleting W2s:
 1. You delete W2s the same way you create them.
 2. `POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
@@ -311,11 +334,9 @@ contributions when you make the claim.
 
 ### Edit Tax Return Deductions:
 1. Edit a claimed deduction using the Tax Return Deduction ID: `PUT http://localhost:8084/taxes/taxreturns/{id}/deductions`
-2. Be sure to include the TaxReturnId in the request body:
+2. We only edit the amount spent. Completely changing the type of deduction was deemed to fall outside of the scope of an edit:
 ```
  {
-     "taxReturn": [taxreturnId],
-     "deduction": [deductionId],
      "amountSpent": [Amount of money spent]
  }
 ```
