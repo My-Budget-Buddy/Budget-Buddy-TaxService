@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -83,6 +84,16 @@ public class GlobalExceptionHandler {
     // Handle UnauthorizedException from trying to access resources not owned by the user::
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorMessage> handleUnauthorizedException(UnauthorizedException e) {
+        ErrorMessage error = new ErrorMessage();
+        error.setErrorCode(HttpStatus.FORBIDDEN.value());
+        error.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    // Handle UnauthorizedException from trying to access S3 without proper credentials:
+    // This is probably more of a 500 error because it would be a configuration issue:
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<ErrorMessage> handleS3Exception(S3Exception e) {
         ErrorMessage error = new ErrorMessage();
         error.setErrorCode(HttpStatus.FORBIDDEN.value());
         error.setMessage(e.getMessage());
