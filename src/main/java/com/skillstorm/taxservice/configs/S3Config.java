@@ -13,8 +13,8 @@ public class S3Config {
     @Bean
     public S3Client s3() {
 
-        // Create a session token for temporary credentials. Ideally you would set up an endpoint to your bucket in your
-        // VPC so you don't have to use temporary credentials, but this should work when testing locally if you don't have an IDE plugin:
+        // Set up AWS credentials to send with the request. Ideally you would set up an endpoint connection to your bucket in your
+        // VPC so that you don't have to send credentials, but this should work when testing locally if you don't have an IDE plugin:
         //AwsSessionCredentials awsCreds = AwsSessionCredentials.create("${ACCESS_KEY}", "${SECRET_ACCESS_KEY}", "${SESSION_TOKEN}");
 
         // Bucket names are globally unique. The bucket you try to access must be within
