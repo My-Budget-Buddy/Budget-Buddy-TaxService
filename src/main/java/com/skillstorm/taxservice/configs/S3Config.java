@@ -14,7 +14,7 @@ public class S3Config {
     public S3Client s3() {
 
         // Create a session token for temporary credentials. Ideally you would set up an endpoint to your bucket in your
-        // VPC so you don't have to use temporary credentials, but I can't figure that out and no one will help me so this is what I'm doing:
+        // VPC so you don't have to use temporary credentials, but this will work when testing locally:
         AwsSessionCredentials awsCreds = AwsSessionCredentials.create("${ACCESS_KEY}", "${SECRET_ACCESS_KEY}", "${SESSION_TOKEN}");
 
         // Bucket names are globally unique. The bucket you try to access must be within
