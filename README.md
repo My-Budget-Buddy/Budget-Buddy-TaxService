@@ -374,10 +374,8 @@ contributions when you make the claim.
 4. The response body from a submission is the same lightweight refund object used to track the current refund estimate throughout the process:
 ```
   {
-    {
     "federalRefund": [amount],
     "stateRefund": [amount]
-}
   }
 ```
 
