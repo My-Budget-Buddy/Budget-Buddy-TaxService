@@ -27,7 +27,9 @@ public class W2Controller {
         this.w2Service = w2Service;
     }
 
-    // Add new W2s or update existing W2s. Can also be used to delete W2s by sending an empty list:
+    // Add new W2s or update existing W2s. Can also be used to delete W2s by sending an empty list
+    // I want to stress that I only did this as a list because I was asked to. Individual CRUD implementation
+    // methods still exist in the service layer:
     @PostMapping
     public ResponseEntity<List<W2Dto>> addW2sByTaxReturnId(@RequestParam("taxReturnId") int taxReturnId,@Valid @RequestBody List<W2Dto> updatedW2s, @RequestHeader("User-ID") int userId) {
         updatedW2s.forEach(w2 -> w2.setUserId(userId));
