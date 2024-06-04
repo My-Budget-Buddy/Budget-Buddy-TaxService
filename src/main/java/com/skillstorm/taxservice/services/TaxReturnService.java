@@ -99,11 +99,7 @@ public class TaxReturnService {
     // Claim a deduction for a TaxReturn:
     public TaxReturnDeductionDto claimDeduction(int id, TaxReturnDeductionDto deduction) {
         deduction.setTaxReturn(id);
-        try {
-            return new TaxReturnDeductionDto(taxReturnDeductionRepository.saveAndFlush(deduction.mapToEntity()));
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateDataException(environment.getProperty("taxreturn.duplicate.deduction"), deduction.getDeductionName());
-        }
+        return new TaxReturnDeductionDto(taxReturnDeductionRepository.saveAndFlush(deduction.mapToEntity()));
     }
 
     // Get the current tax refund for a TaxReturn. Used for front end to keep a running total of the refund amount
