@@ -91,7 +91,7 @@ class W2ServiceTest {
         when(w2Repository.saveAndFlush(newW2.mapToEntity())).thenReturn(returnedW2);
 
         //Call the method to test:
-        W2Dto result = w2Service.addW2(newW2);
+        W2Dto result = w2Service.addW2(1, newW2);
 
         //Verify the result:
         assertEquals(1, result.getId(), "W2 ID should be 1");
@@ -102,28 +102,6 @@ class W2ServiceTest {
         assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
         assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
         assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
-    }
-
-    // Add List of W2s:
-    @Test
-    void addListW2sTest() {
-
-        //Define stubbing:
-        when(w2Repository.saveAll(newW2List.stream().map(W2Dto::mapToEntity).toList())).thenReturn(returnedW2List);
-
-        //Call the method to test:
-        List<W2Dto> result = w2Service.addListW2s(newW2List);
-
-        //Verify the result:
-        assertEquals(1, result.size(), "List size should be 1");
-        assertEquals(1, result.get(0).getId(), "W2 ID should be 1");
-        assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
-        assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
-        assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000.00).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Find W2 by ID Success:
@@ -244,28 +222,6 @@ class W2ServiceTest {
         assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
         assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
         assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
-    }
-
-    // Update All W2s by TaxReturnId:
-    @Test
-    void updateAllByTaxReturnIdTest() {
-
-        //Define stubbing:
-        when(w2Repository.saveAll(returnedW2List)).thenReturn(returnedW2List);
-
-        //Call the method to test:
-        List<W2Dto> result = w2Service.updateAllByTaxReturnId(1, returnedW2List.stream().map(W2Dto::new).toList());
-
-        //Verify the result:
-        assertEquals(1, result.size(), "List size should be 1");
-        assertEquals(1, result.get(0).getId(), "W2 ID should be 1");
-        assertEquals(2024, result.get(0).getYear(), "Year should be 2024");
-        assertEquals(1, result.get(0).getUserId(), "User ID should be 1");
-        assertEquals("Test Employer", result.get(0).getEmployer(), "Employer should be 'Test Employer'");
-        assertEquals(BigDecimal.valueOf(1000).setScale(2), result.get(0).getWages(), "Wages should be 1000.00");
-        assertEquals(BigDecimal.valueOf(300.00).setScale(2), result.get(0).getFederalIncomeTaxWithheld(), "Federal Taxes Withheld should be 300.00");
-        assertEquals(BigDecimal.valueOf(200.00).setScale(2), result.get(0).getSocialSecurityTaxWithheld(), "Social Security Taxes Withheld should be 200.00");
-        assertEquals(BigDecimal.valueOf(100.00).setScale(2), result.get(0).getMedicareTaxWithheld(), "Medicare Taxes Withheld should be 100.00");
     }
 
     // Delete W2 by ID:
