@@ -13,7 +13,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,13 +37,8 @@ public class W2Service {
     }
 
     // Add new W2 by UserId and Year:
-    public W2Dto addW2(W2Dto newW2) {
+    public W2Dto addW2(int taxReturnId, W2Dto newW2) {
         return new W2Dto(w2Repository.saveAndFlush(newW2.mapToEntity()));
-    }
-
-    // Add batch of W2s:
-    public List<W2Dto> addListW2s(List<W2Dto> newW2s) {
-        return w2Repository.saveAll(newW2s.stream().map(W2Dto::mapToEntity).toList()).stream().map(W2Dto::new).toList();
     }
 
     // Find W2 by ID:
@@ -80,17 +74,6 @@ public class W2Service {
         return new W2Dto(w2Repository.saveAndFlush(updatedW2.mapToEntity()));
     }
 
-    // Update all W2s by TaxReturnId:
-    @Transactional
-    public List<W2Dto> updateAllByTaxReturnId(int taxReturnId, List<W2Dto> updatedW2s) {
-
-        // We need to account for the fact that some previously submitted W2s may have been removed:
-        w2Repository.deleteAllByTaxReturnId(taxReturnId);
-
-        // Side effect: Our updated W2s will have new IDs. Unavoidable without a more complex solution.
-        return w2Repository.saveAll(updatedW2s.stream().map(W2Dto::mapToEntity).toList()).stream().map(W2Dto::new).toList();
-    }
-
     // Delete W2 by Id:
     public void deleteById(int id) {
         // Verify W2 exists:
@@ -101,6 +84,7 @@ public class W2Service {
     }
 
     // Upload image to S3:
+    // TODO: Add content type as S3 meta info instead of using Tika
     public String uploadImage(int id, byte[] image, String contentType, int userId) {
         W2 w2 =findById(id, userId).mapToEntity();
         String imageKey = UUID.nameUUIDFromBytes(image).toString() + "." + contentType.split("/")[1];
