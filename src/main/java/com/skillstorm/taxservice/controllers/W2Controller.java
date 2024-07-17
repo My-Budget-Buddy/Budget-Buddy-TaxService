@@ -29,9 +29,9 @@ public class W2Controller {
 
     // Add new W2:
     @PostMapping
-    public ResponseEntity<W2Dto> addW2sByTaxReturnId(@RequestParam("taxReturnId") int taxReturnId,@Valid @RequestBody W2Dto newW2, @RequestHeader("User-ID") int userId) {
+    public ResponseEntity<W2Dto> addW2sByTaxReturnId(@Valid @RequestBody W2Dto newW2, @RequestHeader("User-ID") int userId) {
         newW2.setUserId(userId);
-        return ResponseEntity.ok(w2Service.addW2(taxReturnId, newW2));
+        return ResponseEntity.ok(w2Service.addW2(newW2));
     }
 
     // Find W2 by ID:

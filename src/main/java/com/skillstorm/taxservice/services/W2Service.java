@@ -37,7 +37,7 @@ public class W2Service {
     }
 
     // Add new W2 by UserId and Year:
-    public W2Dto addW2(int taxReturnId, W2Dto newW2) {
+    public W2Dto addW2(W2Dto newW2) {
         return new W2Dto(w2Repository.saveAndFlush(newW2.mapToEntity()));
     }
 
