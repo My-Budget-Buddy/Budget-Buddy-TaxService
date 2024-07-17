@@ -91,7 +91,7 @@ class W2ServiceTest {
         when(w2Repository.saveAndFlush(newW2.mapToEntity())).thenReturn(returnedW2);
 
         //Call the method to test:
-        W2Dto result = w2Service.addW2(1, newW2);
+        W2Dto result = w2Service.addW2(newW2);
 
         //Verify the result:
         assertEquals(1, result.getId(), "W2 ID should be 1");
