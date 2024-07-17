@@ -130,67 +130,39 @@ Tax Service API, it functions as follows:
 1. `DELETE http://localhost:8084/taxes/taxreturns/{taxreturnId}`
 2. Note: This will also delete all documents currently associated with this Tax Return.
 
-### Submitting W2s:
-1. `POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
-2. Request body should be an array of entities:
+### Submitting a W2:
+1. `POST http://localhost:8084/taxes/w2s`
+2. With request body:
 ```
- [
-     {
-         "taxReturnId": [id],
-         "year": [year],
-         "employer": "[Employer Name]",
-         "state": "[XX]",
-         "wages": [wages],
-         "federalIncomeTaxWithheld": [federal income taxes],
-         "stateIncomeTaxWithheld": [state income taxes],
-         "socialSecurityTaxWithheld": [social security taxes],
-         "medicareTaxWithheld": [medicare taxes]
-     },
-     {
-         "taxReturnId": [id],
-         "year": [year],
-         "employer": "[Employer Name]",
-         "state": "[XX]",
-         "wages": [wages],
-         "federalIncomeTaxWithheld": [federal income taxes],
-         "stateIncomeTaxWithheld": [state income taxes],
-         "socialSecurityTaxWithheld": [social security taxes],
-         "medicareTaxWithheld": [medicare taxes]
-     }
- ]
+ {
+     "taxReturnId": [id],
+     "year": [year],
+     "employer": "[Employer Name]",
+     "state": "[XX]",
+     "wages": [wages],
+     "federalIncomeTaxWithheld": [federal income taxes],
+     "stateIncomeTaxWithheld": [state income taxes],
+     "socialSecurityTaxWithheld": [social security taxes],
+     "medicareTaxWithheld": [medicare taxes]
+ }
 ```
 
-### Editing W2s:
-1. You edit W2s the same way you create them.
-2. `POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
-3. Request body should be an array of entities:
+### Editing a W2:
+1. You can update a W2 using it's ID by sending a request to: `PUT http://localhost:8084/taxes/w2s/{w2Id}`
+2. With request body:
 ```
- [
-     {
-         "taxReturnId": [id],
-         "year": [year],
-         "employer": "[Employer Name]",
-         "state": "[XX]",
-         "wages": [wages],
-         "federalIncomeTaxWithheld": [federal income taxes],
-         "stateIncomeTaxWithheld": [state income taxes],
-         "socialSecurityTaxWithheld": [social security taxes],
-         "medicareTaxWithheld": [medicare taxes]
-     },
-     {
-         "taxReturnId": [id],
-         "year": [year],
-         "employer": "[Employer Name]",
-         "state": "[XX]",
-         "wages": [wages],
-         "federalIncomeTaxWithheld": [federal income taxes],
-         "stateIncomeTaxWithheld": [state income taxes],
-         "socialSecurityTaxWithheld": [social security taxes],
-         "medicareTaxWithheld": [medicare taxes]
-     }
- ]
+ {
+     "taxReturnId": [id],
+     "year": [year],
+     "employer": "[Employer Name]",
+     "state": "[XX]",
+     "wages": [wages],
+     "federalIncomeTaxWithheld": [federal income taxes],
+     "stateIncomeTaxWithheld": [state income taxes],
+     "socialSecurityTaxWithheld": [social security taxes],
+     "medicareTaxWithheld": [medicare taxes]
+ }
 ```
-4. This will replace the previously created list with the one submitted here.
 
 ### Upload an image of a W2 to S3:
 1. Note: S3 bucket names are globally unique. The value of the PHOTO_BUCKET environment variable must match a bucket in the region defined in the S3Config.java class:
@@ -214,32 +186,8 @@ Tax Service API, it functions as follows:
 ### Downloading the image
 1. To retrieve the image after it has been stored, we use the w2Id to make a `GET` request to same place uri where it was posted: `GET http://localhost:8084/taxes/w2s/{w2Id}/image`.
 
-### Deleting W2s:
-1. You delete W2s the same way you create them.
-2. `POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
-3. Omit the W2 you want removed from the list of entities in the request body:
-```
- [
-     {
-         "taxReturnId": [id],
-         "year": [year],
-         "employer": "[Employer Name]",
-         "state": "[XX]",
-         "wages": [wages],
-         "federalIncomeTaxWithheld": [federal income taxes],
-         "stateIncomeTaxWithheld": [state income taxes],
-         "socialSecurityTaxWithheld": [social security taxes],
-         "medicareTaxWithheld": [medicare taxes]
-     }
- ]
-```
-4. To delete ALL W2s from a Tax Return, send an empty list:
-`POST http://localhost:8084/taxes/w2s?taxReturnId=[taxreturnID]`
-```
- [
-    
- ]
-```
+### Deleting a W2:
+1. You can delete a W2 using its ID by sending a request to: `DELETE http://localhost:8084/taxes/w2s/{w2Id}`
 
 ### Finding and Viewing W2s:
 1. Find a single W2 by its ID: `GET http://localhost:8084/taxes/w2s/{w2Id}`
