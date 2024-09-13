@@ -2,10 +2,8 @@ package com.skillstorm.taxservice.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
@@ -171,7 +169,7 @@ public class W2ControllerTest {
         // create a list of W2Dtos
         List<W2Dto> w2Dtos = List.of(w2Dto1, w2Dto2);
         
-        // mock the service method to return the list of W2Dtos
+        // mock service method to return the list of W2Dtos
         when(w2Service.findAllByTaxReturnId(taxReturnId, userId)).thenReturn(w2Dtos);
 
         // call the controller method to find all W2s by taxReturnId
