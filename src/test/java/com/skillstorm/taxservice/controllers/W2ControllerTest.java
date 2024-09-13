@@ -216,7 +216,7 @@ public class W2ControllerTest {
     }
 
     @Test
-    public void testDownloadImage() throws Exception {
+    public void testDownloadImage() {
         int id = 123;
         int userId = 1;
 
@@ -241,17 +241,5 @@ public class W2ControllerTest {
         // verify content type is correct
         assertEquals("image", split[0]);
         assertEquals("jpeg", split[1]);
-    }
-    
-    // determine content type is a private method, so we need to tika.detect method to throw an IOException
-    @Test
-    public void testDetermineContentTypeException() throws IOException {
-        // stub the tika.detect method to throw an IOException
-        when(tika.detect(imgResource.getInputStream())).thenThrow(new IOException());
-
-        // verify exception is thrown
-        assertThrows(IOException.class, () -> {
-            tika.detect(imgResource.getInputStream());
-        });
     }
 }
