@@ -1,9 +1,6 @@
 package com.skillstorm.taxservice.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,11 +38,12 @@ public class OtherIncomeControllerTest {
 
     @Test
     public void testFindByTaxReturnId() {
+        int id = 1; 
         OtherIncomeDto otherIncomeDto = new OtherIncomeDto();
 
-        when(otherIncomeService.findByTaxReturnId(anyInt())).thenReturn(otherIncomeDto);
+        when(otherIncomeService.findByTaxReturnId(id)).thenReturn(otherIncomeDto);
 
-        ResponseEntity<OtherIncomeDto> response = otherIncomeController.findByTaxReturnId(0);
+        ResponseEntity<OtherIncomeDto> response = otherIncomeController.findByTaxReturnId(id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(otherIncomeDto, response.getBody());
@@ -55,7 +53,7 @@ public class OtherIncomeControllerTest {
     public void testAddOtherIncome() {
         OtherIncomeDto otherIncomeDto = new OtherIncomeDto();
 
-        when(otherIncomeService.createOtherIncome(any(OtherIncomeDto.class))).thenReturn(otherIncomeDto);
+        when(otherIncomeService.createOtherIncome(otherIncomeDto)).thenReturn(otherIncomeDto);
 
         ResponseEntity<OtherIncomeDto> response = otherIncomeController.addOtherIncome(otherIncomeDto);
 
@@ -67,7 +65,7 @@ public class OtherIncomeControllerTest {
     public void testUpdateOtherIncome() {
         OtherIncomeDto otherIncomeDto = new OtherIncomeDto();
 
-        when(otherIncomeService.updateOtherIncome(any(OtherIncomeDto.class))).thenReturn(otherIncomeDto);
+        when(otherIncomeService.updateOtherIncome(otherIncomeDto)).thenReturn(otherIncomeDto);
 
         ResponseEntity<OtherIncomeDto> response = otherIncomeController.updateOtherIncome(otherIncomeDto);
 
@@ -81,15 +79,17 @@ public class OtherIncomeControllerTest {
 
         ResponseEntity<Void> response = otherIncomeController.deleteOtherIncome(otherIncomeDto);
 
-        verify(otherIncomeService).deleteOtherIncome(any(OtherIncomeDto.class));
+        verify(otherIncomeService).deleteOtherIncome(otherIncomeDto);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test 
     public void testDeleteOtherIncomeById() {
-        ResponseEntity<Void> response = otherIncomeController.deleteOtherIncomeById(anyInt());
+        int id = 1;
 
-        verify(otherIncomeService).deleteOtherIncomeById(anyInt());
+        ResponseEntity<Void> response = otherIncomeController.deleteOtherIncomeById(id);
+
+        verify(otherIncomeService).deleteOtherIncomeById(id);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
