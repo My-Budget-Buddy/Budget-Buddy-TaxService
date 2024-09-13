@@ -131,13 +131,13 @@
             <artifactId>meanbean</artifactId>
             <version>3.0.0-M9</version>
         </dependency>
-        
-        <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+      
+        <!-- added Jacoco -->
 		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>0.8.12</version>
-		</dependency>
+    	    <groupId>org.jacoco</groupId>
+    	    <artifactId>jacoco-maven-plugin</artifactId>
+    	    <version>0.8.12</version>
+    	</dependency>
 
     </dependencies>
 
