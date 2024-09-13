@@ -1,8 +1,6 @@
 package com.skillstorm.taxservice.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,11 +37,12 @@ public class TaxReturnCreditControllerTest {
 
     @Test
     public void testFindByTaxReturnId() {
+        int id = 1;
         TaxReturnCreditDto taxReturnCreditDto = new TaxReturnCreditDto();
 
-        when(taxReturnCreditService.findByTaxReturnId(anyInt())).thenReturn(taxReturnCreditDto);
+        when(taxReturnCreditService.findByTaxReturnId(id)).thenReturn(taxReturnCreditDto);
 
-        ResponseEntity<TaxReturnCreditDto> response = taxReturnCreditController.findByTaxReturnId(0);
+        ResponseEntity<TaxReturnCreditDto> response = taxReturnCreditController.findByTaxReturnId(id);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(taxReturnCreditDto, response.getBody());
@@ -75,10 +74,11 @@ public class TaxReturnCreditControllerTest {
 
     @Test
     public void testDeleteTaxReturnCredit() {
+        int id = 1;
 
-        ResponseEntity<Void> response = taxReturnCreditController.deleteTaxReturnCredit(0);
+        ResponseEntity<Void> response = taxReturnCreditController.deleteTaxReturnCredit(id);
 
-        verify(taxReturnCreditService).deleteTaxReturnCredit(anyInt());
+        verify(taxReturnCreditService).deleteTaxReturnCredit(id);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 }
