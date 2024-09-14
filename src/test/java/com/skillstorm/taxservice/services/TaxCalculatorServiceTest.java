@@ -68,7 +68,9 @@ public class TaxCalculatorServiceTest {
     private StandardDeductionService standardDeductionService;
 
   @Mock
-    private DeductionService deductionService;
+  // re:name convention break
+  // named this deductionSvc to fix weird git build check error
+    private DeductionService deductionSvc;
 
   // unread but there are nested calls to deductionRepository
   @Mock
@@ -1180,7 +1182,7 @@ public class TaxCalculatorServiceTest {
         taxReturn.setDateOfBirth("1990-01-01");
 
         // avoid deduction was null in nested tax calculator service call to resetAgiLimits
-        when(deductionService.findById(1)).thenReturn(new DeductionDto());
+        when(deductionSvc.findById(1)).thenReturn(new DeductionDto());
 
         // Execute the method to test
         TaxReturnDto result = taxCalculatorService.calculateAgi(taxReturn);
@@ -1338,7 +1340,7 @@ public class TaxCalculatorServiceTest {
       deduction.setAgiLimit(deductionDto.getAgiLimit());
 
       // Act
-      when(deductionService.findById(1)).thenReturn(new DeductionDto(deduction));
+      when(deductionSvc.findById(1)).thenReturn(new DeductionDto(deduction));
       TaxReturnDto result = taxCalculatorService.calculateAgi(taxReturn);
 
       // Assert
@@ -1369,7 +1371,7 @@ public class TaxCalculatorServiceTest {
       deduction.setAgiLimit(BigDecimal.valueOf(5000));
 
       // Mock the deduction service to return the correct AGI limit
-      when(deductionService.findById(2)).thenReturn(new DeductionDto(deduction));
+      when(deductionSvc.findById(2)).thenReturn(new DeductionDto(deduction));
 
       // Act
       TaxReturnDto result = taxCalculatorService.calculateAgi(taxReturn);
@@ -1419,7 +1421,7 @@ public class TaxCalculatorServiceTest {
       deduction.setAgiLimit(BigDecimal.valueOf(5000));
 
       // Act
-      when(deductionService.findById(3)).thenReturn(new DeductionDto(deduction));
+      when(deductionSvc.findById(3)).thenReturn(new DeductionDto(deduction));
       TaxReturnDto result = taxCalculatorService.calculateAgi(taxReturn);
       // Assert
       // should actually be 0
@@ -1449,7 +1451,7 @@ public class TaxCalculatorServiceTest {
       deduction.setAgiLimit(deductionDto.getAgiLimit());
 
       // Act
-      when(deductionService.findById(4)).thenReturn(new DeductionDto(deduction));
+      when(deductionSvc.findById(4)).thenReturn(new DeductionDto(deduction));
       TaxReturnDto result = taxCalculatorService.calculateAgi(taxReturn);
 
       // Assert
