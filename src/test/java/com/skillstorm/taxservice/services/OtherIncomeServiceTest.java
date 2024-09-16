@@ -3,11 +3,12 @@ package com.skillstorm.taxservice.services;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.core.env.Environment;
 
 import com.skillstorm.taxservice.dtos.OtherIncomeDto;
@@ -26,7 +27,6 @@ import com.skillstorm.taxservice.models.TaxReturn;
 import com.skillstorm.taxservice.repositories.OtherIncomeRepository;
 import com.skillstorm.taxservice.repositories.TaxReturnRepository;
 
-@ExtendWith(MockitoExtension.class)
 public class OtherIncomeServiceTest {
 
     @Mock
@@ -40,6 +40,18 @@ public class OtherIncomeServiceTest {
 
     @InjectMocks
     private OtherIncomeService otherIncomeService;
+
+    private AutoCloseable closeable;
+
+    @BeforeEach
+    public void setup() {
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    public void teardown() throws Exception {
+        closeable.close();
+    }
 
     // -----------------------------------------------------------------------------------
     // Success Scenarios
