@@ -2,6 +2,7 @@ package com.skillstorm.taxservice.services;
 
 import java.io.InputStream;
 
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,10 +35,17 @@ public class S3ServiceTest {
 
     private final String imageBucket = "test-bucket"; // Mocked environment value
 
+    private AutoCloseable closeable;
+
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+    public void setup() {
+        closeable = MockitoAnnotations.openMocks(this);
         s3Service = new S3Service(s3Client, imageBucket);
+    }
+
+    @AfterEach
+    public void teardown() throws Exception {
+        closeable.close();
     }
 
   @Test
