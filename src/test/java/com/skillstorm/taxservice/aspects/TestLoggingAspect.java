@@ -4,6 +4,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -22,10 +24,16 @@ public class TestLoggingAspect {
     @Mock
     private Signature mockSignature;
 
+    private AutoCloseable closeable;
+
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        loggingAspect = new LoggingAspect();
+    public void setup() {
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    public void teardown() throws Exception {
+        closeable.close();
     }
 
     @Test
