@@ -131,13 +131,13 @@
             <artifactId>meanbean</artifactId>
             <version>3.0.0-M9</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+      
+        <!-- added Jacoco -->
 		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>0.8.12</version>
-		</dependency>
+    	    <groupId>org.jacoco</groupId>
+    	    <artifactId>jacoco-maven-plugin</artifactId>
+    	    <version>0.8.12</version>
+    	</dependency>
 
     </dependencies>
 
@@ -147,7 +147,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -167,22 +166,21 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                          <rules>
-                            <rule>
-                              <limits>
-                                <limit>
-                                  <counter>COMPLEXITY</counter>
-                                  <value>COVEREDRATIO</value>
-                                  <minimum>0.10</minimum>
-                                </limit>
-                              </limits>
-                            </rule>
-                          </rules>
+							<rules>
+                          	  	<rule>
+                          	  	  	<limits>
+                          	  	  	  	<limit>
+                          	  	  	  	  	<counter>COMPLEXITY</counter>
+                          	  	  	  	  	<value>COVEREDRATIO</value>
+                          	  	  	  	  	<minimum>0.10</minimum>
+                          	  	  	  	</limit>
+                          	  	  	</limits>
+                          	  	</rule>
+                          	</rules>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 

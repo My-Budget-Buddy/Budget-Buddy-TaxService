@@ -1,22 +1,21 @@
 package com.skillstorm.taxservice.services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.skillstorm.taxservice.models.StandardDeduction;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
 import com.skillstorm.taxservice.constants.FilingStatus;
@@ -26,6 +25,7 @@ import com.skillstorm.taxservice.dtos.TaxReturnCreditDto;
 import com.skillstorm.taxservice.dtos.TaxReturnDto;
 import com.skillstorm.taxservice.dtos.W2Dto;
 import com.skillstorm.taxservice.models.CapitalGainsTax;
+import com.skillstorm.taxservice.models.StandardDeduction;
 import com.skillstorm.taxservice.models.StateTax;
 import com.skillstorm.taxservice.models.TaxBracket;
 import com.skillstorm.taxservice.models.taxcredits.ChildTaxCredit;
@@ -67,14 +67,21 @@ public class TaxCalculatorServiceTest {
 
   private TaxReturnDto taxReturn;
 
+  private AutoCloseable closeable;
+
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
+    closeable = MockitoAnnotations.openMocks(this);
 
     taxReturn = new TaxReturnDto();
     taxReturn.setId(1);
   }
 
+  @AfterEach
+  public void teardown() throws Exception {
+      closeable.close();
+  }
+  
   @Test
   public void testCalculateAll_DefaultValues() {
 
