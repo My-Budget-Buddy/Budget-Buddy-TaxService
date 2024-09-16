@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,18 +82,25 @@ public class TaxCalculatorServiceTest {
 
   private TaxReturnDto taxReturn;
 
+  private AutoCloseable closeable;
+
   @BeforeEach
   public void setUp() {
-    MockitoAnnotations.openMocks(this);
+      closeable = MockitoAnnotations.openMocks(this);
 
-    taxReturn = new TaxReturnDto();
-    taxReturn.setId(1);
-    taxReturn.setFilingStatus(FilingStatus.SINGLE);
-    taxReturn.setTotalIncome(BigDecimal.valueOf(50000));
-    taxReturn.setAdjustedGrossIncome(BigDecimal.valueOf(45000));
-    taxReturn.setTaxableIncome(BigDecimal.valueOf(40000));
-    taxReturn.setFederalRefund(BigDecimal.ZERO);
-    taxReturn.setState(State.AL);
+      taxReturn = new TaxReturnDto();
+      taxReturn.setId(1);
+      taxReturn.setFilingStatus(FilingStatus.SINGLE);
+      taxReturn.setTotalIncome(BigDecimal.valueOf(50000));
+      taxReturn.setAdjustedGrossIncome(BigDecimal.valueOf(45000));
+      taxReturn.setTaxableIncome(BigDecimal.valueOf(40000));
+      taxReturn.setFederalRefund(BigDecimal.ZERO);
+      taxReturn.setState(State.AL);
+  }
+
+  @AfterEach
+  public void teardown() throws Exception {
+      closeable.close();
   }
 
   @Test
