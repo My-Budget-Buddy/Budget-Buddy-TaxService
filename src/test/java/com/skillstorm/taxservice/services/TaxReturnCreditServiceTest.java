@@ -2,6 +2,7 @@ package com.skillstorm.taxservice.services;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,11 +39,19 @@ class TaxReturnCreditServiceTest {
     private TaxReturnCredit taxReturnCredit;
     private TaxReturnCreditDto taxReturnCreditDto;
 
+
+    private AutoCloseable closeable;
+
     @BeforeEach
-    public void setUp() {
-      MockitoAnnotations.openMocks(this);
+    public void setup() {
+      closeable = MockitoAnnotations.openMocks(this);
       taxReturnCredit = createTaxReturnCredit();
       taxReturnCreditDto = createTaxReturnCreditDto();
+    }
+
+    @AfterEach
+    public void teardown() throws Exception {
+        closeable.close();
     }
 
     @Test
