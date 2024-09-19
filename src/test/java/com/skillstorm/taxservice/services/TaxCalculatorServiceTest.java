@@ -102,7 +102,7 @@ public class TaxCalculatorServiceTest {
   public void teardown() throws Exception {
       closeable.close();
   }
-
+  
   @Test
   public void testCalculateAll_DefaultValues() {
 
