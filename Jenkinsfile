@@ -7,7 +7,7 @@ pipeline {
             spec:
               containers:
               - name: maven
-                image: maven:latest
+                image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/maven:latest
                 command:
                 - "sleep"
                 args:
@@ -135,8 +135,8 @@ pipeline {
                     withSonarQubeEnv('SonarCloud') {
                         sh '''
                             mvn sonar:sonar \
-                                -Dsonar.projectKey=My-Budget-Buddy_Budget-Buddy-BudgetService \
-                                -Dsonar.projectName=Budget-Buddy-BudgetService \
+                                -Dsonar.projectKey=My-Budget-Buddy_Budget-Buddy-TaxService \
+                                -Dsonar.projectName=Budget-Buddy-TaxService \
                                 -Dsonar.java.binaries=target/classes \
                                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                         '''
