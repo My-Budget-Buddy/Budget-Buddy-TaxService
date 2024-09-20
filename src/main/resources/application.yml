@@ -26,9 +26,9 @@ spring:
   # Configure Postgres:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tax-service}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/my_budget_buddy}
     username: ${DATABASE_USER:postgres}
-    password: ${DATABASE_PASS:postgres}
+    password: ${DATABASE_PASS:}
 
     # Run scripts at start-up: always or never
   jpa:
