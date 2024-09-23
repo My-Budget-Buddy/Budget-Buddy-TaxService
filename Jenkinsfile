@@ -1,324 +1,484 @@
 pipeline {
-  agent {
-    kubernetes {
-      yaml '''
-            apiVersion: v1
-            kind: Pod
-            spec:
-              containers:
-              - name: maven
-                image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/maven:latest
-                command:
-                - "sleep"
-                args:
-                - "9999999"
-              - name: aws-kubectl
-                image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/aws-kubectl:latest
-                env:
-                - name: AWS_REGION
-                  valueFrom:
-                    secretKeyRef:
-                      name: ecr-login
-                      key: AWS_REGION
-                - name: AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: ecr-login
-                      key: AWS_ACCESS_KEY_ID
-                - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ecr-login
-                      key: AWS_SECRET_ACCESS_KEY
-                command:
-                - "sleep"
-                args:
-                - "9999999"
-              - name: kaniko
-                image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
-                imagePullPolicy: Always
-                volumeMounts:
-                - name: kaniko-cache
-                  mountPath: /kaniko/.cache
-                env:
-                - name: AWS_REGION
-                  valueFrom:
-                    secretKeyRef:
-                      name: ecr-login
-                      key: AWS_REGION
-                - name: AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: ecr-login
-                      key: AWS_ACCESS_KEY_ID
-                - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ecr-login
-                      key: AWS_SECRET_ACCESS_KEY
-                command:
-                - sleep
-                args:
-                - '9999999'
-                tty: true
-              volumes:
-              - name: kaniko-cache
-                emptyDir: {}
-        '''
-    }
-  }
+    agent any
+// {
+//     kubernetes {
+//       yaml '''
+//             apiVersion: v1
+//             kind: Pod
+//             spec:
+//               containers:
+//               - name: maven
+//                 image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/maven:latest
+//                 command:
+//                 - "sleep"
+//                 args:
+//                 - "9999999"
+//               - name: aws-kubectl
+//                 image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/aws-kubectl:latest
+//                 env:
+//                 - name: AWS_REGION
+//                   valueFrom:
+//                     secretKeyRef:
+//                       name: ecr-login
+//                       key: AWS_REGION
+//                 - name: AWS_ACCESS_KEY_ID
+//                   valueFrom:
+//                     secretKeyRef:
+//                       name: ecr-login
+//                       key: AWS_ACCESS_KEY_ID
+//                 - name: AWS_SECRET_ACCESS_KEY
+//                   valueFrom:
+//                     secretKeyRef:
+//                       name: ecr-login
+//                       key: AWS_SECRET_ACCESS_KEY
+//                 command:
+//                 - "sleep"
+//                 args:
+//                 - "9999999"
+//               - name: kaniko
+//                 image: 924809052459.dkr.ecr.us-east-1.amazonaws.com/kaniko:latest
+//                 imagePullPolicy: Always
+//                 volumeMounts:
+//                 - name: kaniko-cache
+//                   mountPath: /kaniko/.cache
+//                 env:
+//                 - name: AWS_REGION
+//                   valueFrom:
+//                     secretKeyRef:
+//                       name: ecr-login
+//                       key: AWS_REGION
+//                 - name: AWS_ACCESS_KEY_ID
+//                   valueFrom:
+//                     secretKeyRef:
+//                       name: ecr-login
+//                       key: AWS_ACCESS_KEY_ID
+//                 - name: AWS_SECRET_ACCESS_KEY
+//                   valueFrom:
+//                     secretKeyRef:
+//                       name: ecr-login
+//                       key: AWS_SECRET_ACCESS_KEY
+//                 command:
+//                 - sleep
+//                 args:
+//                 - '9999999'
+//                 tty: true
+//               volumes:
+//               - name: kaniko-cache
+//                 emptyDir: {}
+//         '''
+//     }
+//   }
 
-  environment {
-    SERVICE_NAME = 'tax'
-    PASCAL_SERVICE_NAME = 'TaxService'
-    NAMESPACE = 'staging'
-    EUREKA_URL = 'http://discovery-service.staging.svc.cluster.local:8761/eureka'
-    GITHUB_TOKEN = credentials('getBuddy_Github_App')
-    REVIEWER_GITHUB_USERNAME = 'brittshook'
-  }
-
-  stages {
-    stage('Build for Staging') {
-        when {
-            branch 'testing-cohort'
-        }
-
-        steps {
-            container('maven') {
-          sh 'mvn clean install -DskipTests=true -Dspring.profiles.active=build'
-            }
-        }
+    environment {
+        SERVICE_NAME = 'tax-service'
+        PASCAL_SERVICE_NAME = 'TaxService'
+        EUREKA_URL = 'http://discovery-service.staging.svc.cluster.local:8761/eureka'
+        CLIENT_ID = credentials('GITHUB_APP_CLIENT_ID')
+        PEM = credentials('GITHUB_APP_PEM')
+        REVIEWER_GITHUB_USERNAMES = '"brittshook", "daniel413x"'
+        TEST_BRANCH = 'testing-cohort'
+        MAIN_BRANCH = 'testing-main'
     }
 
-    stage('Set Up EKS Test Database') {
-        when {
-            branch 'testing-cohort'
-        }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
+    }
 
-        steps {
-            sh 'git clone https://github.com/My-Budget-Buddy/Budget-Buddy-Kubernetes.git'
-            container('aws-kubectl') {
-          withCredentials([
-                      string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
-                      string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
-                {
-                sh '''
-                aws eks --region us-east-1 update-kubeconfig --name project3-eks
-
-                # deploy test db
-
-                cd Budget-Buddy-Kubernetes/Databases
-                chmod +x ./deploy-database.sh
-                ./deploy-database.sh ${NAMESPACE} $DATABASE_USERNAME $DATABASE_PASSWORD
-
-                '''
+    stages {
+       stage('Get PR Number') {
+            steps {
+                script {
+                    if (env.CHANGE_ID) {
+                        echo "Pipeline was triggered by PR #${env.CHANGE_ID}"
+                    } else {
+                        echo "This is not a PR build."
+                    }
                 }
             }
         }
-    }
 
-    stage('Test and Analyze for Staging') {
-        when {
-            branch 'testing-cohort'
-        }
+        stage('Example Failure') {
+            steps {
+                script {
 
-        steps {
-            container('maven') {
-          withCredentials([
-                  string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USER'),
-                  string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASS')])
-                {
-            sh '''
-                        export DATABASE_URL=jdbc:postgresql://postgres.${NAMESPACE}.svc.cluster.local:5432/my_budget_buddy
-                        mvn clean verify -Pcoverage -Dspring.profiles.active=test \
-                            -Dspring.datasource.url=$DATABASE_URL \
-                            -Dspring.datasource.username=$DATABASE_USER \
-                            -Dspring.datasource.password=$DATABASE_PASS
-                    '''
-            withSonarQubeEnv('SonarCloud') {
-              sh '''
-                            mvn sonar:sonar \
-                                -Dsonar.projectKey=My-Budget-Buddy_Budget-Buddy-UserService \
-                                -Dsonar.projectName=Budget-Buddy-UserService \
-                                -Dsonar.java.binaries=target/classes \
-                                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                                -Dsonar.branch.name=testing-cohort
-                        '''
-            }
+                    error 'Initiate pipeline failure'
                 }
             }
         }
-    }
+    // stage('Build for Staging') {
+    //     when {
+    //         branch 'testing-cohort'
+    //     }
 
-        stage('Test and Analyze for Production') {
-        when {
-            branch 'testing-main'
-        }
+    //     steps {
+    //         container('maven') {
+    //       sh 'mvn clean install -DskipTests=true -Dspring.profiles.active=build'
+    //         }
+    //     }
+    // }
 
-        steps {
-            container('maven') {
-          withCredentials([
-                  string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USER'),
-                  string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASS')])
-                {
-                  sh '''
-                              export DATABASE_URL=jdbc:postgresql://postgres.${NAMESPACE}.svc.cluster.local:5432/my_budget_buddy
-                              mvn clean verify -Pcoverage -Dspring.profiles.active=test \
-                                  -Dspring.datasource.url=$DATABASE_URL \
-                                  -Dspring.datasource.username=$DATABASE_USER \
-                                  -Dspring.datasource.password=$DATABASE_PASS
-                          '''
-                  withSonarQubeEnv('SonarCloud') {
-                    sh '''
-                            mvn sonar:sonar \
-                                -Dsonar.projectKey=My-Budget-Buddy_Budget-Buddy-UserService \
-                                -Dsonar.projectName=Budget-Buddy-UserService \
-                                -Dsonar.java.binaries=target/classes \
-                                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                                -Dsonar.branch.name=testing-main
-                        '''
-                  }
-                }
-            }
-        }
-      }
+    // stage('Set Up EKS Test Database') {
+    //     when {
+    //         branch 'testing-cohort'
+    //     }
 
-    stage('Build and Push Docker Image') {
-      steps {
-        container('kaniko') {
-          script {
-            def imageTag = 'latest'
-
-            // Determine the image tag based on the branch
-            // note that the var must nonetheless be exported in the operative shell command
-            if (BRANCH_NAME == 'testing-cohort') {
-              imageTag = 'test-latest'
-            } else if (env.BRANCH_NAME == 'main') {
-              imageTag = 'latest'
-            }
-
-            sh '''
-              export IMAGE_TAG=''' + imageTag + '''
-              rm -rf /var/lock
-              # Get the ECR login password
-              export ECR_LOGIN=$(aws ecr get-login-password --region $AWS_REGION)
-              if [ -z "$ECR_LOGIN" ]; then
-                echo "Failed to get ECR login password"
-                exit 1
-              fi
-              mkdir -p /kaniko/.docker
-              echo "{\"auths\":{\"924809052459.dkr.ecr.us-east-1.amazonaws.com\":{\"auth\":\"$(echo -n AWS:$ECR_LOGIN | base64)\"}}}" > /kaniko/.docker/config.json
-                echo ${imageTag}
-
-              /kaniko/executor --dockerfile=Dockerfile.prod --context=dir://. --destination=924809052459.dkr.ecr.us-east-1.amazonaws.com/${SERVICE_NAME}-service:${IMAGE_TAG}
-            '''
-          }
-        }
-      }
-    }
-
-    // after this stage, the operative app is deployed to the test EKS cluster
-    // and should be ready for testing on the test eks
-    stage('Deploy to Test EKS') {
-      when {
-        branch 'testing-cohort'
-      }
-
-      steps {
-        container('aws-kubectl') {
-            withCredentials([
-                  string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
-                  string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
-            {
-            sh '''
-            aws eks --region us-east-1 update-kubeconfig --name project3-eks
-
-            # deploy service
-
-            cd Budget-Buddy-Kubernetes/Deployments/Services
-            # set test image
-            sed -i "s/<image-version>/test-latest/" deployment-${SERVICE_NAME}-service.yaml
-            # set test DB url
-            # note use of | as delimiter because of forward slashes in the url
-            sed -i 's|<db-url>|jdbc:psql://postgres.${NAMESPACE}.svc.cluster.local:5432/my_budget_buddy/|' deployment-${SERVICE_NAME}-service.yaml
-
-            # reapply
-
-            # || true to prevent pipeline failure if service does not exist
-            kubectl delete -f ./deployment-${SERVICE_NAME}-service.yaml --namespace=${NAMESPACE} || true
-            kubectl apply -f ./deployment-${SERVICE_NAME}-service.yaml --namespace=${NAMESPACE}
-            '''
-            }
-        }
-      }
-    }
-  }
-
-  // add functional, performance tests
-
-  post {
-    always {
-      cleanWs()
-    }
-
-    // success {
-    //   script {
-    //     // Create the Pull Request
-    //     def apiUrl = "https://github.com/My-Budget-Buddy/Budget-Buddy-${PASCAL_SERVICE_NAME}/pulls"
-    //     def payload = '''
+    //     steps {
+    //         sh 'git clone https://github.com/My-Budget-Buddy/Budget-Buddy-Kubernetes.git'
+    //         container('aws-kubectl') {
+    //       withCredentials([
+    //                   string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+    //                   string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
     //             {
-    //                 "title": "Automated PR: Pipeline successful",
-    //                 "head": "testing-cohort",
-    //                 "base": "main",
-    //                 "body": "This pull request was created automatically after a successful pipeline run."
-    //             }
+    //             sh '''
+    //             aws eks --region us-east-1 update-kubeconfig --name project3-eks
+
+    //             # deploy test db
+
+    //             cd Budget-Buddy-Kubernetes/Databases
+    //             chmod +x ./deploy-database.sh
+    //             ./deploy-database.sh ${NAMESPACE} $DATABASE_USERNAME $DATABASE_PASSWORD
+
     //             '''
-
-    //     def response = httpRequest(
-    //                 url: apiUrl,
-    //                 httpMode: 'POST',
-    //                 customHeaders: [[name: 'Authorization', value: "token ${GITHUB_TOKEN}"]],
-    //                 contentType: 'APPLICATION_JSON',
-    //                 requestBody: payload
-    //             )
-
-    //     // Extract PR number from the response
-    //     if (response.status == 200) {
-    //       def jsonResponse = readJSON text: response.content
-    //       def prNumber = jsonResponse.number
-
-    //       echo "PR #${prNumber} created."
-
-    //       // Request Reviewers for the Pull Request
-    //       def reviewerApiUrl = "https://github.com/My-Budget-Buddy/Budget-Buddy-${PASCAL_SERVICE_NAME}/pulls/${prNumber}/requested_reviewers"
-    //       def reviewerPayload = """
-    //             {
-    //                 "reviewers": ["${REVIEWER_GITHUB_USERNAME}"]
     //             }
-    //             """
+    //         }
+    //     }
+    // }
 
-    //       def reviewerResponse = httpRequest(
-    //                 url: reviewerApiUrl,
-    //                 httpMode: 'POST',
-    //                 customHeaders: [[name: 'Authorization', value: "token ${GITHUB_TOKEN}"]],
-    //                 contentType: 'APPLICATION_JSON',
-    //                 requestBody: reviewerPayload
-    //             )
+    // stage('Test and Analyze for Staging') {
+    //     when {
+    //         branch 'testing-cohort'
+    //     }
 
-    //       if (reviewerResponse.status == 200) {
-    //           echo "Reviewers requested for PR #${prNumber}."
-    //       } else {
-    //           echo "Failed to request reviewers for PR #${prNumber}. Status: ${reviewerResponse.status}"
+    //     steps {
+    //         container('maven') {
+    //       withCredentials([
+    //               string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USER'),
+    //               string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASS')])
+    //             {
+    //         sh '''
+    //                     export DATABASE_URL=jdbc:postgresql://postgres.${NAMESPACE}.svc.cluster.local:5432/my_budget_buddy
+    //                     mvn clean verify -Pcoverage -Dspring.profiles.active=test \
+    //                         -Dspring.datasource.url=$DATABASE_URL \
+    //                         -Dspring.datasource.username=$DATABASE_USER \
+    //                         -Dspring.datasource.password=$DATABASE_PASS
+    //                 '''
+    //         withSonarQubeEnv('SonarCloud') {
+    //           sh '''
+    //                         mvn sonar:sonar \
+    //                             -Dsonar.projectKey=My-Budget-Buddy_Budget-Buddy-UserService \
+    //                             -Dsonar.projectName=Budget-Buddy-UserService \
+    //                             -Dsonar.java.binaries=target/classes \
+    //                             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+    //                             -Dsonar.branch.name=testing-cohort
+    //                     '''
+    //         }
+    //             }
+    //         }
+    //     }
+    // }
+
+    //     stage('Test and Analyze for Production') {
+    //     when {
+    //         branch 'testing-main'
+    //     }
+
+    //     steps {
+    //         container('maven') {
+    //       withCredentials([
+    //               string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USER'),
+    //               string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASS')])
+    //             {
+    //               sh '''
+    //                           export DATABASE_URL=jdbc:postgresql://postgres.${NAMESPACE}.svc.cluster.local:5432/my_budget_buddy
+    //                           mvn clean verify -Pcoverage -Dspring.profiles.active=test \
+    //                               -Dspring.datasource.url=$DATABASE_URL \
+    //                               -Dspring.datasource.username=$DATABASE_USER \
+    //                               -Dspring.datasource.password=$DATABASE_PASS
+    //                       '''
+    //               withSonarQubeEnv('SonarCloud') {
+    //                 sh '''
+    //                         mvn sonar:sonar \
+    //                             -Dsonar.projectKey=My-Budget-Buddy_Budget-Buddy-UserService \
+    //                             -Dsonar.projectName=Budget-Buddy-UserService \
+    //                             -Dsonar.java.binaries=target/classes \
+    //                             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+    //                             -Dsonar.branch.name=testing-main
+    //                     '''
+    //               }
+    //             }
+    //         }
+    //     }
+    //   }
+
+    // stage('Build and Push Docker Image') {
+    //   steps {
+    //     container('kaniko') {
+    //       script {
+    //         def imageTag = 'latest'
+
+    //         // Determine the image tag based on the branch
+    //         // note that the var must nonetheless be exported in the operative shell command
+    //         if (BRANCH_NAME == 'testing-cohort') {
+    //           imageTag = 'test-latest'
+    //         } else if (env.BRANCH_NAME == 'main') {
+    //           imageTag = 'latest'
+    //         }
+
+    //         sh '''
+    //           export IMAGE_TAG=''' + imageTag + '''
+    //           rm -rf /var/lock
+    //           # Get the ECR login password
+    //           export ECR_LOGIN=$(aws ecr get-login-password --region $AWS_REGION)
+    //           if [ -z "$ECR_LOGIN" ]; then
+    //             echo "Failed to get ECR login password"
+    //             exit 1
+    //           fi
+    //           mkdir -p /kaniko/.docker
+    //           echo "{\"auths\":{\"924809052459.dkr.ecr.us-east-1.amazonaws.com\":{\"auth\":\"$(echo -n AWS:$ECR_LOGIN | base64)\"}}}" > /kaniko/.docker/config.json
+    //             echo ${imageTag}
+
+    //           /kaniko/executor --dockerfile=Dockerfile.prod --context=dir://. --destination=924809052459.dkr.ecr.us-east-1.amazonaws.com/${SERVICE_NAME}-service:${IMAGE_TAG}
+    //         '''
     //       }
-    //     } else {
-    //           echo "Failed to create PR. Status: ${response.status}"
     //     }
     //   }
     // }
 
-    // failure {
-    //   echo 'The pipeline failed. No pull request created.'
-    // }
-  }
-}
+    // // after this stage, the operative app is deployed to the test EKS cluster
+    // // and should be ready for testing on the test eks
+    // stage('Deploy to Test EKS') {
+    //   when {
+    //     branch 'testing-cohort'
+    //   }
 
+    //   steps {
+    //     container('aws-kubectl') {
+    //         withCredentials([
+    //               string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+    //               string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
+    //         {
+    //         sh '''
+    //         aws eks --region us-east-1 update-kubeconfig --name project3-eks
+
+    //         # deploy service
+
+    //         cd Budget-Buddy-Kubernetes/Deployments/Services
+    //         # set test image
+    //         sed -i "s/<image-version>/test-latest/" deployment-${SERVICE_NAME}-service.yaml
+    //         # set test DB url
+    //         # note use of | as delimiter because of forward slashes in the url
+    //         sed -i 's|<db-url>|jdbc:psql://postgres.${NAMESPACE}.svc.cluster.local:5432/my_budget_buddy/|' deployment-${SERVICE_NAME}-service.yaml
+
+    //         # reapply
+
+    //         # || true to prevent pipeline failure if service does not exist
+    //         kubectl delete -f ./deployment-${SERVICE_NAME}-service.yaml --namespace=${NAMESPACE} || true
+    //         kubectl apply -f ./deployment-${SERVICE_NAME}-service.yaml --namespace=${NAMESPACE}
+    //         '''
+    //         }
+    //     }
+    //   }
+    // }
+    }
+
+  // add functional, performance tests
+
+    post {
+        always {
+            cleanWs()
+        }
+
+        success {
+            script {
+                if (env.BRANCH_NAME == 'testing-cohort') {
+                    def now = sh(script: 'date +%s', returnStdout: true).trim()
+                    def iat = (now.toInteger() - 60).toString()
+                    def exp = (now.toInteger() + 600).toString()
+
+                    echo "Current time: ${now}"
+                    echo "Issued at: ${iat}"
+                    echo "Expires at: ${exp}"
+
+                    // Generate JWT
+                    def JWT = sh(script: """
+            #!/bin/bash
+            client_id="${CLIENT_ID}"
+            pem="${PEM}"
+            iat="${iat}"
+            exp="${exp}"
+            b64enc() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+            header=\$(echo -n '{"typ":"JWT","alg":"RS256"}' | b64enc)
+            payload=\$(echo -n "{\\"iat\\":\${iat},\\"exp\\":\${exp},\\"iss\\":\\"\${client_id}\\"}" | b64enc)
+            header_payload="\${header}.\${payload}"
+
+            pem_file=\$(mktemp)
+            echo "\${pem}" > "\${pem_file}"
+
+            signature=\$(echo -n "\${header_payload}" | openssl dgst -sha256 -sign "\${pem_file}" | b64enc)
+            JWT="\${header_payload}.\${signature}"
+            rm -f "\${pem_file}"
+            echo "\${JWT}"
+        """, returnStdout: true).trim()
+                    echo "Generated JWT: ${JWT}"
+
+                    // Retrieve access token
+                    def tokenResponse = httpRequest(
+                    url: 'https://api.github.com/app/installations/54988601/access_tokens',
+                    httpMode: 'POST',
+                    customHeaders: [
+                        [name: 'Accept', value: '*/*'],
+                        [name: 'Authorization', value: "Bearer ${JWT}"],
+                    ],
+                    contentType: 'APPLICATION_JSON'
+                )
+
+                    def GITHUB_TOKEN = null
+
+                    if (tokenResponse.status == 201) { // 201 is the status code for created
+                        def jsonResponse = readJSON text: tokenResponse.content
+                        GITHUB_TOKEN = jsonResponse.token
+
+                        echo "Access token ${GITHUB_TOKEN} created."
+        } else {
+                        error 'Access token retrieval failed, aborting pipeline'
+                    }
+
+                    // Create the Pull Request
+                    def pullResponse = httpRequest(
+                    url: "https://api.github.com/repos/My-Budget-Buddy/Budget-Buddy-${PASCAL_SERVICE_NAME}/pulls",
+                    httpMode: 'POST',
+                    customHeaders: [
+                        [name: 'Accept', value: '*/*'],
+                        [name: 'Authorization', value: "Bearer ${GITHUB_TOKEN}"],
+                    ],
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: """
+                        {
+                            "title": "Automated PR: Pipeline successful",
+                            "head": "${TEST_BRANCH}",
+                            "base": "${MAIN_BRANCH}",
+                            "body": "This pull request was created automatically after a successful pipeline run."
+                        }
+                    """
+                )
+
+                    // Extract PR number from the response
+                    if (pullResponse.status == 201) { // 201 is the status code for created
+                        def jsonResponse = readJSON text: pullResponse.content
+                        int prNumber = jsonResponse.number
+
+                        echo "PR #${prNumber} created."
+
+                        // Request Reviewers for the Pull Request
+                        String reviewerApiUrl = "https://api.github.com/repos/My-Budget-Buddy/Budget-Buddy-${PASCAL_SERVICE_NAME}/pulls/${prNumber}/requested_reviewers"
+                        String reviewerPayload = """
+                {
+                    "reviewers": [${REVIEWER_GITHUB_USERNAMES}]
+                }
+                """
+
+                        def reviewerResponse = httpRequest(
+                    url: reviewerApiUrl,
+                    httpMode: 'POST',
+                    customHeaders: [
+                        [name: 'Accept', value: 'application/vnd.github+json'],
+                        [name: 'Authorization', value: "Bearer ${GITHUB_TOKEN}"],
+                        [name: 'X-GitHub-Api-Version', value: '2022-11-28']
+                    ],
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: reviewerPayload
+                )
+
+                        if (reviewerResponse.status == 201) {
+                            echo "Reviewers requested for PR #${prNumber}."
+          } else {
+                            echo "Failed to request reviewers for PR #${prNumber}. Status: ${reviewerResponse.status}"
+                        }
+        } else {
+                        echo "Failed to create PR. Status: ${response.status}"
+                    }
+                }
+            }
+        }
+
+        failure {
+            script {
+                echo 'The pipeline failed. Reverting last PR.'
+                def now = sh(script: 'date +%s', returnStdout: true).trim()
+                def iat = (now.toInteger() - 60).toString()
+                def exp = (now.toInteger() + 600).toString()
+
+                echo "Current time: ${now}"
+                echo "Issued at: ${iat}"
+                echo "Expires at: ${exp}"
+
+                // Generate JWT
+                def JWT = sh(script: """
+                #!/bin/bash
+                client_id="${CLIENT_ID}"
+                pem="${PEM}"
+                iat="${iat}"
+                exp="${exp}"
+                b64enc() { openssl base64 -A | tr '+/' '-_' | tr -d '='; }
+                header=\$(echo -n '{"typ":"JWT","alg":"RS256"}' | b64enc)
+                payload=\$(echo -n "{\\"iat\\":\${iat},\\"exp\\":\${exp},\\"iss\\":\\"\${client_id}\\"}" | b64enc)
+                header_payload="\${header}.\${payload}"
+
+                pem_file=\$(mktemp)
+                echo "\${pem}" > "\${pem_file}"
+
+                signature=\$(echo -n "\${header_payload}" | openssl dgst -sha256 -sign "\${pem_file}" | b64enc)
+                JWT="\${header_payload}.\${signature}"
+                rm -f "\${pem_file}"
+                echo "\${JWT}"
+            """, returnStdout: true).trim()
+                echo "Generated JWT: ${JWT}"
+
+                // Retrieve access token
+                def tokenResponse = httpRequest(
+            url: 'https://api.github.com/app/installations/54988601/access_tokens',
+            httpMode: 'POST',
+            customHeaders: [
+                [name: 'Accept', value: '*/*'],
+                [name: 'Authorization', value: "Bearer ${JWT}"],
+            ],
+            contentType: 'APPLICATION_JSON'
+            )
+
+                def GITHUB_TOKEN = null
+
+                if (tokenResponse.status == 201) { // 201 is the status code for created
+                    def jsonResponse = readJSON text: tokenResponse.content
+                    GITHUB_TOKEN = jsonResponse.token
+
+                    echo "Access token ${GITHUB_TOKEN} created."
+          } else {
+                    error 'Access token retrieval failed, aborting pipeline'
+                }
+
+                // Get a list of merged Pull Requests
+                def listMergedPullResponse = httpRequest(
+            url: "https://api.github.com/search/issues?q=repo:My-Budget-Buddy/Budget-Buddy-${PASCAL_SERVICE_NAME}+is:pr+is:merged&sort=created&order=desc",
+            httpMode: 'GET',
+            customHeaders: [
+                [name: 'Accept', value: '*/*'],
+                [name: 'Authorization', value: "Bearer ${GITHUB_TOKEN}"],
+            ],
+            contentType: 'APPLICATION_JSON',
+            )
+
+                def lastMergedPullRequest = null
+
+                if (listClosedPullResponse.status == 200) { // 200 is the status code for OK
+                    def jsonResponse = readJSON text: listMergedPullResponse.content
+                    lastMergedPullRequest = jsonResponse[0]
+                    def prNumber = lastMergedPullRequest.number
+
+                    echo "Retrieved last PR #${prNumber}"
+          } else {
+                    error "Failed to retrieve last PR. Status: ${response.status}"
+                }
+            }
+        }
+    }
+}
