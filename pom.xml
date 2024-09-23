@@ -13,7 +13,7 @@
     <artifactId>tax-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>tax-service</name>
-    <description>Handles Tax Returns for BudgetBuddy API</description>
+    <description>Handle Tax Returns for BudgetBuddy API</description>
 
     <properties>
         <java.version>17</java.version>
