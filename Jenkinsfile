@@ -85,18 +85,6 @@ pipeline {
     }
 
     stages {
-       stage('Get PR Number') {
-            steps {
-                script {
-                    if (env.CHANGE_ID) {
-                        echo "Pipeline was triggered by PR #${env.CHANGE_ID}"
-                    } else {
-                        echo "This is not a PR build."
-                    }
-                }
-            }
-        }
-
         stage('Example Failure') {
             steps {
                 script {
@@ -469,7 +457,7 @@ pipeline {
 
                 def lastMergedPullRequest = null
 
-                if (listClosedPullResponse.status == 200) { // 200 is the status code for OK
+                if (listMergedPullResponse.status == 200) { // 200 is the status code for OK
                     def jsonResponse = readJSON text: listMergedPullResponse.content
                     lastMergedPullRequest = jsonResponse[0]
                     def prNumber = lastMergedPullRequest.number
