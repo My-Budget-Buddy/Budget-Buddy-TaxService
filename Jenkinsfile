@@ -103,6 +103,7 @@ pipeline {
                 sh '''
             git clone https://github.com/My-Budget-Buddy/Budget-Buddy-Kubernetes.git
             git clone -b testing-cohort-dev https://github.com/My-Budget-Buddy/Budget-Buddy-Frontend-Testing.git
+            git clone https://github.com/My-Budget-Buddy/Budget-Buddy-PerformanceTests.git
             '''
             }
         }
