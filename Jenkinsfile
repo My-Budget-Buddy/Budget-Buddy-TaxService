@@ -243,7 +243,69 @@ pipeline {
             }
         }
 
-        stage('Selenium/Cucumber Tests') {
+        // Deploy the service to EKS for production
+        stage('Deploy to EKS for Production') {
+            when {
+                branch 'testing-main'
+            }
+
+            steps {
+                container('aws-kubectl') {
+                    withCredentials([
+                    string(credentialsId: 'PROD_DATABASE_URL', variable: 'DATABASE_URL'),
+                    string(credentialsId: 'PROD_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+                    string(credentialsId: 'PROD_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
+                  {
+                        sh """
+                      aws eks --region us-east-1 update-kubeconfig --name project3-eks
+
+                      # deploy service
+
+                      cd Budget-Buddy-Kubernetes/Deployments/Services
+                      # set prod image
+                      sed -i "s/<image-version>/latest/" deployment-${SERVICE_NAME}.yaml
+
+                      # set prod DB url
+                      # note use of | as delimiter because of forward slashes in the url
+                      sed -i 's|<database-url>|${DATABASE_URL}|' deployment-${SERVICE_NAME}.yaml
+
+                      # reapply
+
+                      kubectl delete -f ./deployment-${SERVICE_NAME}.yaml --namespace=${NAMESPACE} || true
+                      kubectl apply -f ./deployment-${SERVICE_NAME}.yaml --namespace=${NAMESPACE}
+                      """
+                  }
+                }
+            }
+        }
+
+        // Reset db before running functional tests
+        stage('Reset Database for Functional Tests') {
+            when {
+                branch 'testing-cohort'
+            }
+
+            steps {
+                container('aws-kubectl') {
+                    withCredentials([
+                          string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+                          string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
+                  {
+                        sh '''
+                  aws eks --region us-east-1 update-kubeconfig --name project3-eks
+
+                  # deploy staging db
+
+                  cd Budget-Buddy-Kubernetes/Databases
+                  chmod +x ./deploy-database.sh
+                  ./deploy-database.sh ${NAMESPACE} $DATABASE_USERNAME $DATABASE_PASSWORD
+                  '''
+                  }
+                }
+            }
+        }
+
+        stage('Functional Tests') {
             when {
                 branch 'testing-cohort'
             }
@@ -307,43 +369,37 @@ pipeline {
             }
         }
 
-    // add performance tests
-
-        // Deploy the service to EKS for production
-        stage('Deploy to EKS for Production') {
+                // Reset db before running functional tests
+        stage('Reset Database for Performance Tests') {
             when {
-                branch 'testing-main'
+                branch 'testing-cohort'
             }
 
             steps {
                 container('aws-kubectl') {
                     withCredentials([
-                    string(credentialsId: 'PROD_DATABASE_URL', variable: 'DATABASE_URL'),
-                    string(credentialsId: 'PROD_DATABASE_USER', variable: 'DATABASE_USERNAME'),
-                    string(credentialsId: 'PROD_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
+                          string(credentialsId: 'STAGING_DATABASE_USER', variable: 'DATABASE_USERNAME'),
+                          string(credentialsId: 'STAGING_DATABASE_PASSWORD', variable: 'DATABASE_PASSWORD')])
                   {
-                        sh """
-                      aws eks --region us-east-1 update-kubeconfig --name project3-eks
+                sh '''
+                  aws eks --region us-east-1 update-kubeconfig --name project3-eks
 
-                      # deploy service
+                  # deploy staging db
 
-                      cd Budget-Buddy-Kubernetes/Deployments/Services
-                      # set prod image
-                      sed -i "s/<image-version>/latest/" deployment-${SERVICE_NAME}.yaml
-
-                      # set prod DB url
-                      # note use of | as delimiter because of forward slashes in the url
-                      sed -i 's|<database-url>|${DATABASE_URL}|' deployment-${SERVICE_NAME}.yaml
-
-                      # reapply
-
-                      kubectl delete -f ./deployment-${SERVICE_NAME}.yaml --namespace=${NAMESPACE} || true
-                      kubectl apply -f ./deployment-${SERVICE_NAME}.yaml --namespace=${NAMESPACE}
-                      """
+                  cd Budget-Buddy-Kubernetes/Databases
+                  chmod +x ./deploy-database.sh
+                  ./deploy-database.sh ${NAMESPACE} $DATABASE_USERNAME $DATABASE_PASSWORD
+                  '''
                   }
                 }
             }
         }
+
+        // stage('Performance tests') {
+        //     steps {
+
+        //     }
+        // }
     }
 
     post {
