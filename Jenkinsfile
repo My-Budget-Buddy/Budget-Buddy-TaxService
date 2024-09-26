@@ -73,6 +73,7 @@ pipeline {
     }
 
     environment {
+        SERVICE_ROUTE = 'taxes'
         SERVICE_NAME = 'tax-service'
         PASCAL_SERVICE_NAME = 'TaxService'
         CLIENT_ID = credentials('GITHUB_APP_CLIENT_ID')
@@ -369,7 +370,7 @@ pipeline {
             }
         }
 
-                // Reset db before running functional tests
+        // Reset db before running performance tests
         stage('Reset Database for Performance Tests') {
             when {
                 branch 'testing-cohort'
@@ -395,11 +396,30 @@ pipeline {
             }
         }
 
-        // stage('Performance tests') {
-        //     steps {
+        stage('Performance Test for Staging') {
+        when {
+            branch 'testing-cohort'
+        }
+        steps {
+            sh '''
+                TRIES_REMAINING=16
 
-        //     }
-        // }
+                echo 'Waiting for frontend to be ready...'
+                while ! curl --output /dev/null --silent https://staging.api.skillstorm-congo.com/${SERVICE_ROUTE}; do
+                    TRIES_REMAINING=$((TRIES_REMAINING - 1))
+                    if [ $TRIES_REMAINING -le 0 ]; then
+                        echo "***Service is ready***"
+                        exit 1
+                    fi
+                done
+            '''
+        
+            container('aws-kubectl') {
+                bzt "Budget-Buddy-PerformanceTests/stepping.yaml"
+                archiveArtifacts artifacts: '*/**.jtl', allowEmptyArchive: true
+            }
+          }
+        }
     }
 
     post {
