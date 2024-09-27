@@ -267,7 +267,7 @@ pipeline {
         }
     }
 
-    stage('Selenium/Cucumber Tests'){
+    stage('Functional Tests for Staging'){
         when {
             branch 'testing-cohort'
         }
@@ -323,7 +323,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'CUCUMBER_TOKEN', variable: 'CUCUMBER_TOKEN')]) {
                         sh '''
                             cd Budget-Buddy-Frontend-Testing/cucumber-selenium-tests
-                            mvn test -Dheadless=true -Dcucumber.publish.token=${CUCUMBER_TOKEN} -DfrontendUrl=https://staging.frontend.skillstorm-congo.com -Dmaven.test.failure.ignore=true
+                            mvn test -Dheadless=true -Dcucumber.publish.token=${CUCUMBER_TOKEN} -DfrontendUrl=https://staging.frontend.skillstorm-congo.com
                         '''
                     }
                 }
@@ -360,7 +360,7 @@ pipeline {
         sh '''
             TRIES_REMAINING=16
 
-            echo 'Waiting for frontend to be ready...'
+            echo 'Waiting for service to be ready...'
             while ! curl --output /dev/null --silent https://staging.api.skillstorm-congo.com/${SERVICE_ROUTE}; do
                 TRIES_REMAINING=$((TRIES_REMAINING - 1))
                 if [ $TRIES_REMAINING -le 0 ]; then
