@@ -1,12 +1,7 @@
 package com.skillstorm.taxservice.services;
 
-import com.skillstorm.taxservice.constants.FilingStatus;
-import com.skillstorm.taxservice.dtos.*;
-import com.skillstorm.taxservice.exceptions.DuplicateDataException;
-import com.skillstorm.taxservice.exceptions.NotFoundException;
-import com.skillstorm.taxservice.exceptions.UnauthorizedException;
-import com.skillstorm.taxservice.repositories.TaxReturnDeductionRepository;
-import com.skillstorm.taxservice.repositories.TaxReturnRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -15,7 +10,16 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.skillstorm.taxservice.constants.FilingStatus;
+import com.skillstorm.taxservice.dtos.RefundDto;
+import com.skillstorm.taxservice.dtos.TaxReturnDeductionDto;
+import com.skillstorm.taxservice.dtos.TaxReturnDto;
+import com.skillstorm.taxservice.dtos.UserDataDto;
+import com.skillstorm.taxservice.exceptions.DuplicateDataException;
+import com.skillstorm.taxservice.exceptions.NotFoundException;
+import com.skillstorm.taxservice.exceptions.UnauthorizedException;
+import com.skillstorm.taxservice.repositories.TaxReturnDeductionRepository;
+import com.skillstorm.taxservice.repositories.TaxReturnRepository;
 
 @Service
 @PropertySource("classpath:SystemMessages.properties")
@@ -50,6 +54,17 @@ public class TaxReturnService {
         TaxReturnDto taxReturnDto = new TaxReturnDto(taxReturnRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(environment.getProperty("taxreturn.not.found") + " " + id)));
         taxCalculatorService.calculateAll(taxReturnDto);
+        return taxReturnDto;
+    }
+
+    // overload to prevent certain endpoints from trying to calculate the return (DELETE)
+    @PostAuthorize("returnObject.userId == #userId")
+    public TaxReturnDto findById(int id, int userId, boolean calculate) {
+        TaxReturnDto taxReturnDto = new TaxReturnDto(taxReturnRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(environment.getProperty("taxreturn.not.found") + " " + id)));
+        if (calculate) {
+            taxReturnDto = findById(id, userId);
+        }
         return taxReturnDto;
     }
 
@@ -88,7 +103,7 @@ public class TaxReturnService {
     // Delete TaxReturn by id:
     public void deleteTaxReturn(int id, int userId) {
         // Verify that the TaxReturn exists:
-        TaxReturnDto taxReturnDto = findById(id, userId);
+        TaxReturnDto taxReturnDto = findById(id, userId, false);
         if (userId != taxReturnDto.getUserId()) {
             throw new UnauthorizedException(environment.getProperty("user.unauthorized"));
         }
